@@ -82,6 +82,8 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | 7 | `bd96c76` | feat: add docker/ base config (P2.3) |
 | — | `496e307` | docs: fix bootstrap-log hash for #7 (meta) |
 | 8 | `e77e7b6` | feat: add seed/ + scripts/ scaffolds (P2.4) |
+| — | `2652b0b` | fix: bootstrap-log #8 hash correction (meta) |
+| 9 | `abc2968` | fix: replace em-dash with ASCII in scripts (P2.5) |
 
 ---
 
@@ -338,6 +340,28 @@ scripts/
 3. **seed/package.json** — `@spektra/seed` csomag, `tsx` dependency a TypeScript futtatáshoz
 4. **Minden script idempotent tervvel** — Test-Path guard-ok, re-run safe
 5. **Workspace-relatív path pattern**: `$PSScriptRoot\..\..\` → workspace root
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
+## #9 — PowerShell encoding fix (2026-04-05) · `abc2968`
+
+**Commit:** `fix: replace em-dash with ASCII in scripts — PowerShell 5.1 encoding compat (P2.5)`
+
+### Mi változott
+
+- 4 `.ps1` fájlban az em-dash (`—`, U+2014) karakterek ASCII `--` -re cserélve
+- PowerShell 5.1 alapértelmezetten ANSI kódolást vár, a UTF-8 em-dash eltörte a parsingot
+- A `-ForegroundColor` param és a következő sorok literal textként jelentek meg
+
+### Miért
+
+- P2.5 siker-kritérium: "Script-ek futtathatók (még üres logikával)"
+- Mind a 4 script tesztelve: `bootstrap.ps1`, `link-plugin.ps1`, `link-overlay.ps1`, `setup-env.ps1`
+- Mindegyik hibátlanul fut és WARNING-gal jelzi a scaffold státuszt
 
 ### Státusz
 

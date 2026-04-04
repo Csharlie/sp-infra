@@ -24,4 +24,4 @@ if (Test-Path $PluginTarget) {
 }
 
 # Phase 4.3: create symlink
-Write-Warning "link-plugin.ps1 is a scaffold — real implementation in Phase 4.3."
+Write-Warning "link-plugin.ps1 is a scaffold -- real implementation in Phase 4.3."

@@ -24,4 +24,4 @@ if (Test-Path $OverlayTarget) {
 }
 
 # Phase 4.4: create symlink
-Write-Warning "link-overlay.ps1 is a scaffold — real implementation in Phase 4.4."
+Write-Warning "link-overlay.ps1 is a scaffold -- real implementation in Phase 4.4."

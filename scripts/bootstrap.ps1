@@ -23,7 +23,7 @@ $ErrorActionPreference = "Stop"
 $WorkspaceRoot = (Get-Item "$PSScriptRoot\..\..\").FullName
 $RuntimePath = Join-Path $WorkspaceRoot ".local\wp-runtimes\$Client"
 
-Write-Host "Spektra Bootstrap — Client: $Client" -ForegroundColor Cyan
+Write-Host "Spektra Bootstrap - Client: $Client" -ForegroundColor Cyan
 Write-Host "Workspace: $WorkspaceRoot"
 Write-Host "Runtime:   $RuntimePath"
 
@@ -35,4 +35,4 @@ Write-Host "Runtime:   $RuntimePath"
 # - Verify ACF installed
 # - Run setup-env.ps1
 
-Write-Warning "bootstrap.ps1 is a scaffold — real implementation in Phase 4."
+Write-Warning "bootstrap.ps1 is a scaffold -- real implementation in Phase 4."

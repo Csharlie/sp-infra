@@ -28,4 +28,4 @@ if (Test-Path $EnvFile) {
     Write-Host "No .env file found at: $EnvFile" -ForegroundColor Yellow
 }
 
-Write-Warning "setup-env.ps1 is a scaffold — real implementation in Phase 5.4."
+Write-Warning "setup-env.ps1 is a scaffold -- real implementation in Phase 5.4."
