@@ -55,8 +55,9 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 |---|------|--------|
 | 1 | `75c7783` | init: sp-infra repository — shared Spektra WP infrastructure |
 | 2 | `f5b634d` | docs: add bootstrap-log — infra kronológikus napló |
-| 3 | `6b8f9b4` | chore: scaffold sp-infra directory structure |
+| 3 | `7b1da56` | chore: scaffold sp-infra directory structure |
 | 4 | `75c7cb7` | chore: add .gitignore + BOUNDARY.md — runtime boundary rules |
+| — | `613cb9c` | docs: fix bootstrap-log hash for #4 (meta) |
 
 ---
 
@@ -106,6 +107,41 @@ docs/
 
 ---
 
+## #3 — Directory scaffold (2026-04-05) · `7b1da56`
+
+**Commit:** `chore: scaffold sp-infra directory structure`
+
+### Mi jött létre
+
+```
+sp-infra/
+├── plugin/README.md           ← spektra-api plugin — purpose, planned structure, rules
+├── acf/README.md              ← reusable ACF helpers — planned helpers, rules
+├── docker/README.md           ← Docker base config — status: prepared, not primary
+├── seed/README.md             ← seed pipeline — pipeline diagram, planned files
+├── scripts/README.md          ← dev tooling — planned scripts, rules
+└── apps/README.md             ← runnable infra presets — naming rules
+```
+
+### Miért
+
+- v4 roadmap P1.2: sp-infra alapstruktúra scaffold
+- Minden mappában README — purpose + planned content + boundary rules
+- Git requires files to track directories — README-k kettős célt szolgálnak
+
+### Döntések
+
+1. **7 top-level mappa**: plugin/, acf/, docker/, seed/, scripts/, apps/, docs/
+2. **Minden README tartalmazza**: purpose, planned files, boundary rules
+3. **Nincs még implementáció** — csak struktúra és dokumentáció
+4. **docs/ már létezett** (#2-ből) — nem kap új README-t
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
 ## #4 — Boundary rules (2026-04-05) · `75c7cb7`
 
 **Commit:** `chore: add .gitignore + BOUNDARY.md — runtime boundary rules`
@@ -136,41 +172,6 @@ sp-benettcar/.gitignore    ← .local/, .env, .env.local hozzáadva
 2. **sp-benettcar .gitignore bővítve**: .local/, .env, .env.local, .env.*.local
 3. **BOUNDARY.md 6 szekció**: repo határok, runtime szabály, overlay szabály, WP boundary, dependency flow, ellenőrzés
 4. **.local/ workspace root szinten** — nem egyetlen repo-ban, de minden .gitignore-ban benne van safety-ből
-
-### Státusz
-
-✅ Pusholva.
-
----
-
-## #3 — Directory scaffold (2026-04-05) · `6b8f9b4`
-
-**Commit:** `chore: scaffold sp-infra directory structure`
-
-### Mi jött létre
-
-```
-sp-infra/
-├── plugin/README.md           ← spektra-api plugin — purpose, planned structure, rules
-├── acf/README.md              ← reusable ACF helpers — planned helpers, rules
-├── docker/README.md           ← Docker base config — status: prepared, not primary
-├── seed/README.md             ← seed pipeline — pipeline diagram, planned files
-├── scripts/README.md          ← dev tooling — planned scripts, rules
-└── apps/README.md             ← runnable infra presets — naming rules
-```
-
-### Miért
-
-- v4 roadmap P1.2: sp-infra alapstruktúra scaffold
-- Minden mappában README — purpose + planned content + boundary rules
-- Git requires files to track directories — README-k kettős célt szolgálnak
-
-### Döntések
-
-1. **7 top-level mappa**: plugin/, acf/, docker/, seed/, scripts/, apps/, docs/
-2. **Minden README tartalmazza**: purpose, planned files, boundary rules
-3. **Nincs még implementáció** — csak struktúra és dokumentáció
-4. **docs/ már létezett** (#2-ből) — nem kap új README-t
 
 ### Státusz
 
