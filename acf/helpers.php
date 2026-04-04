@@ -43,14 +43,17 @@ function spektra_acf_image_to_media( ?array $image ): ?array {
 /**
  * Convert ACF image sizes array to Spektra MediaVariant[] shape.
  *
+ * Platform contract (MediaVariant):
+ *   { name: string, source: { url: string, width?: number, height?: number, format?: string } }
+ *
  * @param array $sizes ACF sizes sub-array (from image field).
- * @return array MediaVariant[] — each: { url, width, height }.
+ * @return array MediaVariant[] — each: { name, source: { url, width, height } }.
  *
  * Phase 6.1: real implementation.
  */
 function spektra_acf_sizes_to_variants( array $sizes ): array {
 	// Phase 6.1: iterate named size keys (thumbnail, medium, large, etc.)
-	// and return [ [ 'url' => ..., 'width' => ..., 'height' => ... ], ... ]
+	// and return [ [ 'name' => 'thumbnail', 'source' => [ 'url' => ..., 'width' => ..., 'height' => ... ] ], ... ]
 	return [];
 }
 
