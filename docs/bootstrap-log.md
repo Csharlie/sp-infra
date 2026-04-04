@@ -56,7 +56,7 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | 1 | `75c7783` | init: sp-infra repository — shared Spektra WP infrastructure |
 | 2 | `f5b634d` | docs: add bootstrap-log — infra kronológikus napló |
 | 3 | `6b8f9b4` | chore: scaffold sp-infra directory structure |
-| 4 | `26a1640` | chore: add .gitignore + BOUNDARY.md — runtime boundary rules |
+| 4 | `75c7cb7` | chore: add .gitignore + BOUNDARY.md — runtime boundary rules |
 
 ---
 
@@ -106,7 +106,7 @@ docs/
 
 ---
 
-## #4 — Boundary rules (2026-04-05) · `26a1640`
+## #4 — Boundary rules (2026-04-05) · `75c7cb7`
 
 **Commit:** `chore: add .gitignore + BOUNDARY.md — runtime boundary rules`
 
