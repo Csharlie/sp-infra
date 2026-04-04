@@ -65,7 +65,7 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | 4 | `75c7cb7` | chore: add .gitignore + BOUNDARY.md — runtime boundary rules |
 | — | `613cb9c` | docs: fix bootstrap-log hash for #4 (meta) |
 | — | `4fbb897` | docs: fix bootstrap-log — correct #3 hash, fix entry order (meta) |
-| 5 | `920a0b5` | feat: add spektra-api plugin base skeleton (P2.1) |
+| 5 | `e5948e0` | feat: add spektra-api plugin base skeleton (P2.1) |
 
 ---
 
@@ -187,7 +187,7 @@ sp-benettcar/.gitignore    ← .local/, .env, .env.local hozzáadva
 
 ---
 
-## #5 — Plugin base skeleton (2026-04-05) · `920a0b5`
+## #5 — Plugin base skeleton (2026-04-05) · `e5948e0`
 
 **Commit:** `feat: add spektra-api plugin base skeleton (P2.1)`
 
