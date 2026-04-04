@@ -83,7 +83,7 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | — | `496e307` | docs: fix bootstrap-log hash for #7 (meta) |
 | 8 | `e77e7b6` | feat: add seed/ + scripts/ scaffolds (P2.4) |
 | — | `2652b0b` | fix: bootstrap-log #8 hash correction (meta) |
-| 9 | `abc2968` | fix: replace em-dash with ASCII in scripts (P2.5) |
+| 9 | `ff77870` | fix: replace em-dash with ASCII in scripts (P2.5) |
 
 ---
 
@@ -347,7 +347,7 @@ scripts/
 
 ---
 
-## #9 — PowerShell encoding fix (2026-04-05) · `abc2968`
+## #9 — PowerShell encoding fix (2026-04-05) · `ff77870`
 
 **Commit:** `fix: replace em-dash with ASCII in scripts — PowerShell 5.1 encoding compat (P2.5)`
 
