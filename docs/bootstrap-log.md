@@ -81,7 +81,7 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | — | `22fdf97` | fix: align sizes_to_variants contract with platform MediaVariant shape |
 | 7 | `bd96c76` | feat: add docker/ base config (P2.3) |
 | — | `496e307` | docs: fix bootstrap-log hash for #7 (meta) |
-| 8 | `f706b45` | feat: add seed/ + scripts/ scaffolds (P2.4) |
+| 8 | `e77e7b6` | feat: add seed/ + scripts/ scaffolds (P2.4) |
 
 ---
 
@@ -305,7 +305,7 @@ docker/
 
 ---
 
-## #8 — Seed + scripts scaffold (2026-04-05) · `f706b45`
+## #8 — Seed + scripts scaffold (2026-04-05) · `e77e7b6`
 
 **Commit:** `feat: add seed/ + scripts/ scaffolds — export-seed.ts, 4 PowerShell scripts (P2.4)`
 
