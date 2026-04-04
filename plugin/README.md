@@ -6,16 +6,16 @@ Reusable `spektra-api` WordPress REST plugin.
 
 Generic WP REST endpoint that serves SiteData-compatible JSON. Client-specific logic loaded from external config (client infra overlay).
 
-## Structure (planned)
+## Structure
 
 ```
 plugin/
 └── spektra-api/
-    ├── spektra-api.php              # Plugin header, autoload, hooks
+    ├── spektra-api.php              # Plugin header, autoload, hooks, config loading
     └── includes/
-        ├── class-rest-controller.php    # register_rest_route
-        ├── class-response-builder.php   # SiteData JSON assembly
-        └── class-cors.php               # CORS + preflight
+        ├── class-rest-controller.php    # register_rest_route (spektra/v1/site)
+        ├── class-response-builder.php   # SiteData JSON assembly (Phase 7)
+        └── class-cors.php               # CORS + preflight (Phase 5.3)
 ```
 
 ## Rules

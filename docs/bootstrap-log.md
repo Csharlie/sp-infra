@@ -6,14 +6,20 @@ Kronológikus napló: mi jött létre, mikor, miért.
 
 ## Jelenlegi állapot (Architecture Snapshot)
 
-> Utolsó frissítés: boundary rules (#4)
+> Utolsó frissítés: plugin skeleton (#5)
 
 ### Workspace struktúra
 
 ```
 D:\Projects\spektra\sp-infra\          ← shared WP integration infra
 ├── plugin/                            ← spektra-api WP REST plugin (reusable core)
-│   └── README.md
+│   ├── README.md
+│   └── spektra-api/
+│       ├── spektra-api.php            ← plugin header, autoload, config loading
+│       └── includes/
+│           ├── class-rest-controller.php  ← REST route registration
+│           ├── class-response-builder.php ← SiteData JSON assembly
+│           └── class-cors.php             ← CORS + preflight
 ├── acf/                               ← Reusable ACF helpers
 │   └── README.md
 ├── docker/                            ← Docker base config (WP + MariaDB + WP-CLI)
@@ -58,6 +64,8 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | 3 | `7b1da56` | chore: scaffold sp-infra directory structure |
 | 4 | `75c7cb7` | chore: add .gitignore + BOUNDARY.md — runtime boundary rules |
 | — | `613cb9c` | docs: fix bootstrap-log hash for #4 (meta) |
+| — | `4fbb897` | docs: fix bootstrap-log — correct #3 hash, fix entry order (meta) |
+| 5 | `920a0b5` | feat: add spektra-api plugin base skeleton (P2.1) |
 
 ---
 
@@ -172,6 +180,43 @@ sp-benettcar/.gitignore    ← .local/, .env, .env.local hozzáadva
 2. **sp-benettcar .gitignore bővítve**: .local/, .env, .env.local, .env.*.local
 3. **BOUNDARY.md 6 szekció**: repo határok, runtime szabály, overlay szabály, WP boundary, dependency flow, ellenőrzés
 4. **.local/ workspace root szinten** — nem egyetlen repo-ban, de minden .gitignore-ban benne van safety-ből
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
+## #5 — Plugin base skeleton (2026-04-05) · `920a0b5`
+
+**Commit:** `feat: add spektra-api plugin base skeleton (P2.1)`
+
+### Mi jött létre
+
+```
+plugin/spektra-api/
+├── spektra-api.php                    ← plugin header, constants, autoload, config loading, hook registration
+└── includes/
+    ├── class-rest-controller.php      ← GET /wp-json/spektra/v1/site route skeleton
+    ├── class-response-builder.php     ← SiteData JSON assembly skeleton (build() → meta/navigation/pages)
+    └── class-cors.php                 ← CORS + preflight skeleton (rest_pre_serve_request filter)
+```
+
+### Miért
+
+- v4 roadmap P2.1: plugin/ base skeleton
+- A struktúra a v4 Section 6.1 tervét követi
+- Skeleton = hook registration + class structure, NEM implementáció (Phase 5 + 7)
+
+### Döntések
+
+1. **Config loading**: Strategy B (ENV var `SPEKTRA_CLIENT_CONFIG` + symlink fallback `../spektra-config/config.php`)
+2. **Namespace**: `Spektra\API` — minden class ebben él
+3. **REST route**: `spektra/v1/site`, GET, publikus (permission_callback = `__return_true`)
+4. **Preview support**: `?preview=true` param kész, auth Phase 5-ben
+5. **CORS**: `rest_pre_serve_request` filter — origins a kliens config-ból (Phase 5.3)
+6. **Response builder**: `build(bool $is_preview)` → üres `meta/navigation/pages` tömb (Phase 7 tölti)
+7. **Nincs class-config-loader.php** — a config loading a main plugin fájlban él (v4 terv szerint)
 
 ### Státusz
 
