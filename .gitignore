@@ -1,0 +1,27 @@
+# === Runtime ===
+# Assembled WP runtimes are NEVER committed.
+# .local/ lives at workspace root, but listed here for safety.
+.local/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === IDE ===
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# === Node (seed tools, scripts) ===
+node_modules/
+dist/
+*.tsbuildinfo
+
+# === PHP ===
+vendor/
+
+# === Environment ===
+.env
+.env.local
+.env.*.local

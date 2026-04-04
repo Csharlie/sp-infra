@@ -6,7 +6,7 @@ Kronológikus napló: mi jött létre, mikor, miért.
 
 ## Jelenlegi állapot (Architecture Snapshot)
 
-> Utolsó frissítés: scaffold (#2)
+> Utolsó frissítés: boundary rules (#4)
 
 ### Workspace struktúra
 
@@ -26,6 +26,8 @@ D:\Projects\spektra\sp-infra\          ← shared WP integration infra
 │   └── README.md
 ├── docs/                              ← Infrastructure documentation
 │   └── bootstrap-log.md               ← ez a fájl
+├── .gitignore                         ← runtime + environment + IDE ignores
+├── BOUNDARY.md                        ← v4 határ-szabályok dokumentáció
 └── README.md
 ```
 
@@ -54,6 +56,7 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | 1 | `75c7783` | init: sp-infra repository — shared Spektra WP infrastructure |
 | 2 | `f5b634d` | docs: add bootstrap-log — infra kronológikus napló |
 | 3 | `6b8f9b4` | chore: scaffold sp-infra directory structure |
+| 4 | `26a1640` | chore: add .gitignore + BOUNDARY.md — runtime boundary rules |
 
 ---
 
@@ -96,6 +99,43 @@ sp-infra/
 docs/
 └── bootstrap-log.md           ← kronológikus napló (ez a fájl)
 ```
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
+## #4 — Boundary rules (2026-04-05) · `26a1640`
+
+**Commit:** `chore: add .gitignore + BOUNDARY.md — runtime boundary rules`
+
+### Mi jött létre
+
+```
+sp-infra/
+├── .gitignore             ← .local/, node_modules, vendor, .env, IDE ignores
+└── BOUNDARY.md            ← v4 határ-szabályok (repo határok, runtime szabály,
+                              overlay szabály, WP-ismeret határ, dependency flow)
+```
+
+Változás más repo-ban:
+```
+sp-benettcar/.gitignore    ← .local/, .env, .env.local hozzáadva
+```
+
+### Miért
+
+- v4 roadmap P1.4: .gitignore + boundary rules
+- `.local/` gitignored — assembled WP runtime soha nem commitolható
+- BOUNDARY.md — határ-szabályok egy helyen, contributor reference
+
+### Döntések
+
+1. **sp-infra .gitignore**: .local/, node_modules/, vendor/, .env, IDE fájlok
+2. **sp-benettcar .gitignore bővítve**: .local/, .env, .env.local, .env.*.local
+3. **BOUNDARY.md 6 szekció**: repo határok, runtime szabály, overlay szabály, WP boundary, dependency flow, ellenőrzés
+4. **.local/ workspace root szinten** — nem egyetlen repo-ban, de minden .gitignore-ban benne van safety-ből
 
 ### Státusz
 
