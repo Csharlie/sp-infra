@@ -1,0 +1,13 @@
+{
+  "name": "@spektra/seed",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Seed pipeline tools — site.ts → seed.json → WP-CLI import",
+  "type": "module",
+  "scripts": {
+    "export": "tsx export-seed.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  }
+}

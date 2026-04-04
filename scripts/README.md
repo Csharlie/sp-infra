@@ -6,12 +6,16 @@ Developer tooling for Spektra infrastructure.
 
 PowerShell scripts for local development setup, symlink management, and environment configuration.
 
-## Planned scripts
+## Structure
 
-- `bootstrap.ps1` — Full local setup (WP runtime, symlinks, env)
-- `link-plugin.ps1` — Symlink plugin → WP runtime
-- `link-overlay.ps1` — Symlink client infra overlay → WP runtime
-- `setup-env.ps1` — Environment variable loader
+```
+scripts/
+├── bootstrap.ps1      # Full local setup (scaffold — Phase 4)
+├── link-plugin.ps1    # Symlink plugin → WP runtime (scaffold — Phase 4.3)
+├── link-overlay.ps1   # Symlink client overlay → WP runtime (scaffold — Phase 4.4)
+├── setup-env.ps1      # Environment loader (scaffold — Phase 5.4)
+└── README.md
+```
 
 ## Rules
 

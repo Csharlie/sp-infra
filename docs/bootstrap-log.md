@@ -6,7 +6,7 @@ Kronológikus napló: mi jött létre, mikor, miért.
 
 ## Jelenlegi állapot (Architecture Snapshot)
 
-> Utolsó frissítés: Docker base config (#7)
+> Utolsó frissítés: seed + scripts scaffold (#8)
 
 ### Workspace struktúra
 
@@ -28,9 +28,15 @@ D:\Projects\spektra\sp-infra\          ← shared WP integration infra
 │   ├── docker-compose.yml             ← 3 service: wordpress, mariadb, wpcli
 │   └── .env.example                   ← credentials template
 ├── seed/                              ← Seed pipeline tools
-│   └── README.md
+│   ├── README.md
+│   ├── export-seed.ts                 ← site.ts → seed.json (scaffold — Phase 10.4)
+│   └── package.json                   ← @spektra/seed (tsx dep)
 ├── scripts/                           ← Developer tooling (bootstrap, symlink, env)
-│   └── README.md
+│   ├── README.md
+│   ├── bootstrap.ps1                  ← Full local setup (scaffold — Phase 4)
+│   ├── link-plugin.ps1                ← Plugin symlink (scaffold — Phase 4.3)
+│   ├── link-overlay.ps1               ← Overlay symlink (scaffold — Phase 4.4)
+│   └── setup-env.ps1                  ← Env loader (scaffold — Phase 5.4)
 ├── apps/                              ← Runnable infra presets
 │   └── README.md
 ├── docs/                              ← Infrastructure documentation
@@ -74,6 +80,8 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | — | `da12b43` | docs: fix bootstrap-log hash for #6 (meta) |
 | — | `22fdf97` | fix: align sizes_to_variants contract with platform MediaVariant shape |
 | 7 | `bd96c76` | feat: add docker/ base config (P2.3) |
+| — | `496e307` | docs: fix bootstrap-log hash for #7 (meta) |
+| 8 | `f706b45` | feat: add seed/ + scripts/ scaffolds (P2.4) |
 
 ---
 
@@ -290,6 +298,46 @@ docker/
 4. **wpcli profiles: ["cli"]** — nem indul automatikusan `docker compose up`-pal
 5. **Healthcheck**: mariadb healthcheck.sh — wordpress service vár rá (`service_healthy`)
 6. **.env.example**: jelszó mezők üresen — a contributor tölti ki
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
+## #8 — Seed + scripts scaffold (2026-04-05) · `f706b45`
+
+**Commit:** `feat: add seed/ + scripts/ scaffolds — export-seed.ts, 4 PowerShell scripts (P2.4)`
+
+### Mi jött létre
+
+```
+seed/
+├── export-seed.ts         ← site.ts → seed.json converter skeleton (Phase 10.4)
+├── package.json           ← @spektra/seed, tsx dependency
+└── README.md              ← frissítve: Structure
+
+scripts/
+├── bootstrap.ps1          ← Full local setup — WP runtime + symlinks + env (Phase 4)
+├── link-plugin.ps1        ← Symlink sp-infra/plugin/spektra-api → runtime (Phase 4.3)
+├── link-overlay.ps1       ← Symlink client infra/ → runtime plugins/spektra-config (Phase 4.4)
+├── setup-env.ps1          ← .env fájl betöltés, SPEKTRA_CLIENT_CONFIG beállítás (Phase 5.4)
+└── README.md              ← frissítve: Structure
+```
+
+### Miért
+
+- v4 roadmap P2.4: seed/ + scripts/ + docs/ scaffold
+- Minden script paraméterezett: `-Client` param (default: benettcar)
+- Scaffold = help text + path logic kész, tényleges műveletek Phase 4/5/10-ben
+
+### Döntések
+
+1. **4 PowerShell script** a v4 scripts/README tervei alapján — mindegyik `-Client` paraméterrel
+2. **export-seed.ts** scaffold — `npx tsx` alapú, process.exit(1) amíg nem implementált
+3. **seed/package.json** — `@spektra/seed` csomag, `tsx` dependency a TypeScript futtatáshoz
+4. **Minden script idempotent tervvel** — Test-Path guard-ok, re-run safe
+5. **Workspace-relatív path pattern**: `$PSScriptRoot\..\..\` → workspace root
 
 ### Státusz
 

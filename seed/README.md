@@ -16,11 +16,14 @@ site.ts (client static data)
         → WordPress DB (ACF field values)
 ```
 
-## Planned files
+## Structure
 
-- `export-seed.ts` — site.ts → seed.json converter
-- `import-seed.sh` / `import-seed.ps1` — WP-CLI import script
-- `package.json` — Seed tool dependencies
+```
+seed/
+├── export-seed.ts     # site.ts → seed.json converter (scaffold — Phase 10.4)
+├── package.json       # @spektra/seed — tsx dependency
+└── README.md
+```
 
 ## Rules
 
