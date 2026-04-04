@@ -68,7 +68,7 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | — | `4fbb897` | docs: fix bootstrap-log — correct #3 hash, fix entry order (meta) |
 | 5 | `e5948e0` | feat: add spektra-api plugin base skeleton (P2.1) |
 | — | `b2b1169` | docs: fix bootstrap-log hash for #5 (meta) |
-| 6 | `9909218` | feat: add acf/helpers.php scaffold (P2.2) |
+| 6 | `8fe6f34` | feat: add acf/helpers.php scaffold (P2.2) |
 
 ---
 
@@ -227,7 +227,7 @@ plugin/spektra-api/
 
 ---
 
-## #6 — ACF helpers scaffold (2026-04-05) · `9909218`
+## #6 — ACF helpers scaffold (2026-04-05) · `8fe6f34`
 
 **Commit:** `feat: add acf/helpers.php scaffold — image_to_media, sizes_to_variants, group_to_cta (P2.2)`
 
