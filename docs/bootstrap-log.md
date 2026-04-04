@@ -6,7 +6,7 @@ Kronológikus napló: mi jött létre, mikor, miért.
 
 ## Jelenlegi állapot (Architecture Snapshot)
 
-> Utolsó frissítés: ACF helpers scaffold (#6)
+> Utolsó frissítés: Docker base config (#7)
 
 ### Workspace struktúra
 
@@ -24,7 +24,9 @@ D:\Projects\spektra\sp-infra\          ← shared WP integration infra
 │   ├── README.md
 │   └── helpers.php                    ← image_to_media, sizes_to_variants, group_to_cta
 ├── docker/                            ← Docker base config (WP + MariaDB + WP-CLI)
-│   └── README.md
+│   ├── README.md
+│   ├── docker-compose.yml             ← 3 service: wordpress, mariadb, wpcli
+│   └── .env.example                   ← credentials template
 ├── seed/                              ← Seed pipeline tools
 │   └── README.md
 ├── scripts/                           ← Developer tooling (bootstrap, symlink, env)
@@ -69,6 +71,9 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | 5 | `e5948e0` | feat: add spektra-api plugin base skeleton (P2.1) |
 | — | `b2b1169` | docs: fix bootstrap-log hash for #5 (meta) |
 | 6 | `8fe6f34` | feat: add acf/helpers.php scaffold (P2.2) |
+| — | `da12b43` | docs: fix bootstrap-log hash for #6 (meta) |
+| — | `22fdf97` | fix: align sizes_to_variants contract with platform MediaVariant shape |
+| 7 | `ca20f2a` | feat: add docker/ base config (P2.3) |
 
 ---
 
@@ -251,6 +256,40 @@ acf/
 2. **3 függvény stub**: `spektra_acf_image_to_media`, `spektra_acf_sizes_to_variants`, `spektra_acf_group_to_cta`
 3. **Partial implementation**: `image_to_media` és `group_to_cta` üres-guard logika kész, `sizes_to_variants` üres tömböt ad (Phase 6.1-ben iteráció)
 4. **Nincs `acf_add_local_field_group`** — field regisztráció CSAK a kliens overlay-ban (`sp-benettcar/infra/acf/`)
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
+## #7 — Docker base config (2026-04-05) · `ca20f2a`
+
+**Commit:** `feat: add docker/ base config — docker-compose.yml + .env.example (P2.3)`
+
+### Mi jött létre
+
+```
+docker/
+├── docker-compose.yml     ← 3 service (wordpress, mariadb, wpcli) + 3 named volume
+├── .env.example           ← WP_PORT, MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD, MYSQL_ROOT_PASSWORD
+└── README.md              ← frissítve: Structure, Services tábla, Usage
+```
+
+### Miért
+
+- v4 roadmap P2.3: docker/ base config
+- v4 Section 8.5: Docker = előkészített, nem elsődleges (WAMP primary — DR-004)
+- Docker kész CI/CD vagy WAMP-mentes gépeknél
+
+### Döntések
+
+1. **v4 Section 8.5 tervezett yaml 1:1 átvéve** — wordpress:6.7-php8.3-apache, mariadb:11.4, wordpress:cli-php8.3
+2. **Plugin bind mount** (`../plugin/spektra-api` → container plugins/) — nem symlink Dockerben
+3. **Seed mount**: `../seed:/seed` a wpcli service-ben (Phase 10.4-ben használja)
+4. **wpcli profiles: ["cli"]** — nem indul automatikusan `docker compose up`-pal
+5. **Healthcheck**: mariadb healthcheck.sh — wordpress service vár rá (`service_healthy`)
+6. **.env.example**: jelszó mezők üresen — a contributor tölti ki
 
 ### Státusz
 
