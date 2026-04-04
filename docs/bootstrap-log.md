@@ -6,7 +6,7 @@ Kronológikus napló: mi jött létre, mikor, miért.
 
 ## Jelenlegi állapot (Architecture Snapshot)
 
-> Utolsó frissítés: plugin skeleton (#5)
+> Utolsó frissítés: ACF helpers scaffold (#6)
 
 ### Workspace struktúra
 
@@ -21,7 +21,8 @@ D:\Projects\spektra\sp-infra\          ← shared WP integration infra
 │           ├── class-response-builder.php ← SiteData JSON assembly
 │           └── class-cors.php             ← CORS + preflight
 ├── acf/                               ← Reusable ACF helpers
-│   └── README.md
+│   ├── README.md
+│   └── helpers.php                    ← image_to_media, sizes_to_variants, group_to_cta
 ├── docker/                            ← Docker base config (WP + MariaDB + WP-CLI)
 │   └── README.md
 ├── seed/                              ← Seed pipeline tools
@@ -66,6 +67,8 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | — | `613cb9c` | docs: fix bootstrap-log hash for #4 (meta) |
 | — | `4fbb897` | docs: fix bootstrap-log — correct #3 hash, fix entry order (meta) |
 | 5 | `e5948e0` | feat: add spektra-api plugin base skeleton (P2.1) |
+| — | `b2b1169` | docs: fix bootstrap-log hash for #5 (meta) |
+| 6 | `9909218` | feat: add acf/helpers.php scaffold (P2.2) |
 
 ---
 
@@ -217,6 +220,37 @@ plugin/spektra-api/
 5. **CORS**: `rest_pre_serve_request` filter — origins a kliens config-ból (Phase 5.3)
 6. **Response builder**: `build(bool $is_preview)` → üres `meta/navigation/pages` tömb (Phase 7 tölti)
 7. **Nincs class-config-loader.php** — a config loading a main plugin fájlban él (v4 terv szerint)
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
+## #6 — ACF helpers scaffold (2026-04-05) · `9909218`
+
+**Commit:** `feat: add acf/helpers.php scaffold — image_to_media, sizes_to_variants, group_to_cta (P2.2)`
+
+### Mi jött létre
+
+```
+acf/
+├── README.md     ← frissítve: Structure tábla, helper függvény státuszok
+└── helpers.php   ← 3 helper függvény scaffold (Phase 6.1 tölti ki)
+```
+
+### Miért
+
+- v4 roadmap P2.2: acf/ reusable helpers scaffold
+- A helpers.php az egyetlen shared ACF utility fájl (Section 16.2 alapján)
+- Kétszintű ACF modell: helpers = sp-infra (shared), field-groups = client overlay
+
+### Döntések
+
+1. **Egy fájl** (`helpers.php`) — nem szétbontva (`media-helper.php` + `helpers.php`) — egyszerűbb, a Section 16.2 is `acf/helpers.php`-t hivatkozza
+2. **3 függvény stub**: `spektra_acf_image_to_media`, `spektra_acf_sizes_to_variants`, `spektra_acf_group_to_cta`
+3. **Partial implementation**: `image_to_media` és `group_to_cta` üres-guard logika kész, `sizes_to_variants` üres tömböt ad (Phase 6.1-ben iteráció)
+4. **Nincs `acf_add_local_field_group`** — field regisztráció CSAK a kliens overlay-ban (`sp-benettcar/infra/acf/`)
 
 ### Státusz
 
