@@ -73,7 +73,7 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | 6 | `8fe6f34` | feat: add acf/helpers.php scaffold (P2.2) |
 | — | `da12b43` | docs: fix bootstrap-log hash for #6 (meta) |
 | — | `22fdf97` | fix: align sizes_to_variants contract with platform MediaVariant shape |
-| 7 | `ca20f2a` | feat: add docker/ base config (P2.3) |
+| 7 | `bd96c76` | feat: add docker/ base config (P2.3) |
 
 ---
 
@@ -263,7 +263,7 @@ acf/
 
 ---
 
-## #7 — Docker base config (2026-04-05) · `ca20f2a`
+## #7 — Docker base config (2026-04-05) · `bd96c76`
 
 **Commit:** `feat: add docker/ base config — docker-compose.yml + .env.example (P2.3)`
 
