@@ -87,6 +87,7 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | — | `91e1644` | fix: bootstrap-log #9 hash correction (meta) |
 | 10 | `36626be` | refactor: config loader return-array pattern (P3.1) |
 | 11 | `036ecf4` | fix: response-builder placeholder shape meta -> site |
+| 12 | `49d5a96` | feat: link-plugin.ps1 real impl + NAMESPACE fix (P4.3) |
 
 ---
 
@@ -369,6 +370,36 @@ scripts/
 ### Státusz
 
 ✅ Pusholva.
+
+---
+
+## #12 -- link-plugin.ps1 + NAMESPACE fix (2026-04-05) . `49d5a96`
+
+**Commit:** `feat: link-plugin.ps1 real impl + fix NAMESPACE reserved keyword in rest-controller (P4.3)`
+
+### Mi valtozott
+
+1. **scripts/link-plugin.ps1** -- scaffold lecserelve valos implementaciora:
+   - `New-Item -ItemType Junction` -- nem SymbolicLink (admin jog nem kell)
+   - Idempotens: `Test-Path` guard (ha mar letezik, kilepk)
+   - Source/target validacio: `Test-Path $PluginSource`, `Test-Path $PluginsDir`
+   - Parancs: `& .\scripts\link-plugin.ps1 -Client benettcar`
+
+2. **class-rest-controller.php** -- `const NAMESPACE` atnevezve `const API_NAMESPACE`-re:
+   - `namespace` PHP reserved keyword -- PHP 8-ban fatal error
+   - WP error handler elnyelte, a plugin csendben nem regisztralodott
+   - `self::NAMESPACE` -> `self::API_NAMESPACE` mindenhol
+
+### Runtime hatas
+
+- Junction letrehozva: `.local/wp-runtimes/benettcar/wp-content/plugins/spektra-api` -> `sp-infra/plugin/spektra-api`
+- Plugin aktivalva (MySQL active_plugins update)
+- Spektra endpoint mukodik: `http://benettcar.local/wp-json/spektra/v1/site` -> 200 OK
+- Response: `{"site":[],"navigation":[],"pages":[]}` (helyes placeholder shape)
+
+### Statusz
+
+Pusholva.
 
 ---
 
