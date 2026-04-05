@@ -8,14 +8,16 @@
  * Rules:
  * - Required field missing → return null (section skipped by caller)
  * - Optional field missing → key present with null/empty/default value
- * - Image fields return raw ACF arrays (P7.4 will normalize)
+ * - Image fields normalized via spektra_normalize_media() → Media | null
+ *   (exception: bc-gallery images[].src stays raw — P8 handles it)
  * - Output keys are camelCase (matches platform TypeScript contracts)
  * - bc-* specific — acknowledged as P11.3 technical debt
  *
- * Depends on: helpers.php (spektra_get_field).
+ * Depends on: helpers.php (spektra_get_field), media-helper.php (spektra_normalize_media).
  *
  * Phase history:
  *   P7.3: initial implementation — 10 bc-* section builders.
+ *   P7.4: media normalization — ACF image → canonical Media shape.
  *
  * @package Spektra\ACF
  */
@@ -69,7 +71,7 @@ function spektra_build_bc_hero( string $p, int $pid ): ?array {
 		'title'           => $title,
 		'subtitle'        => spektra_get_field( $p . 'subtitle', $pid, '' ),
 		'description'     => $desc,
-		'backgroundImage' => spektra_get_field( $p . 'background_image', $pid ),
+		'backgroundImage' => spektra_normalize_media( spektra_get_field( $p . 'background_image', $pid ) ),
 	];
 
 	$pct = spektra_get_field( $p . 'primary_cta_text', $pid );
@@ -112,7 +114,7 @@ function spektra_build_bc_brand( string $p, int $pid ): ?array {
 		'brands'      => array_map( function ( array $row ): array {
 			return [
 				'name'   => $row['name'] ?? '',
-				'logo'   => $row['logo'] ?? null,
+				'logo'   => spektra_normalize_media( $row['logo'] ?? null ),
 				'alt'    => $row['alt'] ?? '',
 				'invert' => (bool) ( $row['invert'] ?? false ),
 			];
@@ -256,7 +258,7 @@ function spektra_build_bc_about( string $p, int $pid ): ?array {
 		'content'       => array_map( function ( array $row ): string {
 			return $row['paragraph'] ?? '';
 		}, $content ),
-		'image'         => spektra_get_field( $p . 'image', $pid ),
+		'image'         => spektra_normalize_media( spektra_get_field( $p . 'image', $pid ) ),
 		'imagePosition' => spektra_get_field( $p . 'image_position', $pid, 'right' ),
 		'colorScheme'   => spektra_get_field( $p . 'color_scheme', $pid, 'light' ),
 	];
@@ -303,7 +305,7 @@ function spektra_build_bc_team( string $p, int $pid ): ?array {
 			return [
 				'name'  => $row['name'] ?? '',
 				'role'  => $row['role'] ?? '',
-				'image' => $row['image'] ?? null,
+				'image' => spektra_normalize_media( $row['image'] ?? null ),
 				'phone' => $row['phone'] ?? '',
 				'email' => $row['email'] ?? '',
 			];
