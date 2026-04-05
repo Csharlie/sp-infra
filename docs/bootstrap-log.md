@@ -375,6 +375,50 @@ scripts/
 
 ---
 
+## #17 -- class-cors.php real impl (2026-04-05) · `26a3f21`
+
+**Commit:** `feat: class-cors.php -- real CORS impl, origin whitelist, preflight 204, Vary header (P5.3)`
+
+### Mi változott
+
+1. **Origin whitelist a kliens configból:**
+   - `SPEKTRA_CLIENT_CONFIG['allowed_origins']` tömb alapján dönt
+   - Engedélyezett origin → `Access-Control-Allow-Origin: <origin>` + `Vary: Origin`
+   - Nem engedélyezett → `header_remove()` — WP default CORS felülírása
+   - Origin nélküli kérés → nem nyúlunk hozzá
+
+2. **Preflight kezelés (OPTIONS):**
+   - Engedélyezett origin + OPTIONS → 204 No Content
+   - `Allow-Methods: GET, OPTIONS`
+   - `Allow-Headers: Content-Type, Authorization`
+   - `Access-Control-Max-Age: 86400` (24h preflight cache)
+
+3. **Namespace szűrés:**
+   - Csak `/spektra/` route-okra hat
+   - Nem-spektra route-ok (pl. `/wp/v2/types`) → WP default CORS marad
+
+4. **WP default CORS felülírás:**
+   - WP `rest_send_cors_headers()` minden origin-re küld Allow-Origin headert
+   - A mi filterünk priority 100-on fut (WP default: 10), tehát utána
+   - Nem engedélyezett origin → `header_remove('Access-Control-Allow-Origin')`
+
+### Smoke test eredmények
+
+| Eset | Státusz | Allow-Origin | Vary |
+|---|---|---|---|
+| Allowed origin GET | 200 | `http://localhost:5174` | `Origin` |
+| Disallowed origin GET | 200 | NOT SET | `Origin` |
+| No origin GET | 200 | NOT SET | — |
+| Preflight allowed | 204 | `http://localhost:5174` | — |
+| Preflight disallowed | 200 | NOT SET | — |
+| Non-spektra route | 200 | `http://evil.com` (WP default) | — |
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
 ## #16 -- class-rest-controller.php real impl (2026-04-05) · `0f7a129`
 
 **Commit:** `feat: rest-controller -- schema, validate preview, version+cache headers (P5.2)`
