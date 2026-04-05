@@ -27,8 +27,12 @@ require_once SPEKTRA_API_PATH . 'includes/class-response-builder.php';
 // Strategy B: ENV var with symlink fallback.
 // The client config.php is loaded from an external path — never hardcoded.
 // Real config comes from sp-benettcar/infra/config.php (symlinked at runtime).
+//
+// NOTE: We use WP_PLUGIN_DIR instead of __DIR__ because __DIR__ resolves through
+// Junctions to the real source path (e.g. sp-infra/plugin/spektra-api/), while the
+// spektra-config Junction lives as a sibling in wp-content/plugins/.
 
-$spektra_config_path = getenv( 'SPEKTRA_CLIENT_CONFIG' ) ?: __DIR__ . '/../spektra-config/config.php';
+$spektra_config_path = getenv( 'SPEKTRA_CLIENT_CONFIG' ) ?: WP_PLUGIN_DIR . '/spektra-config/config.php';
 $spektra_config      = [];
 
 if ( file_exists( $spektra_config_path ) ) {
@@ -39,6 +43,15 @@ if ( file_exists( $spektra_config_path ) ) {
 }
 
 define( 'SPEKTRA_CLIENT_CONFIG', $spektra_config );
+
+// === ACF field group loading ===
+// Load client ACF field groups from overlay (if present).
+// The field-groups.php file registers its own acf/init hook internally,
+// so a plain require_once is correct here — no timing issue.
+$spektra_acf_path = dirname( $spektra_config_path ) . '/acf/field-groups.php';
+if ( file_exists( $spektra_acf_path ) ) {
+	require_once $spektra_acf_path;
+}
 
 // === Hook registration ===
 // REST route + CORS hooks registered on rest_api_init.
