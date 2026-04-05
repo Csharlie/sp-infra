@@ -375,6 +375,31 @@ scripts/
 
 ---
 
+## #15 -- spektra-api.php finalize (2026-04-05) · `9b0321f`
+
+**Commit:** `refactor: spektra-api.php finalize -- add API_URL, clean Phase 5 comments (P5.1)`
+
+### Mi változott
+
+1. **SPEKTRA_API_URL konstans hozzáadva:**
+   - `define( 'SPEKTRA_API_URL', plugin_dir_url( __FILE__ ) );`
+   - Szükséges asset URL-ekhez — Phase 5+ lépések használják
+
+2. **Phase 5 placeholder kommentek eltávolítva:**
+   - Hook registration szekcióból kikerült a "Implementation: Phase 5." megjegyzés
+   - A hook-ok már implementálva vannak — komment elavult volt
+
+### Runtime hatás
+
+- Endpoint: 200 OK, `debug.log` üres — nincs regresszió
+- SPEKTRA_API_URL elérhető a plugin kódban
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
 ## #14 -- WP_PLUGIN_DIR fix + ACF field group loader (2026-04-05) . `43c4456`
 
 **Commit:** `fix: config path __DIR__ -> WP_PLUGIN_DIR + add ACF field group loader (P4.5)`
