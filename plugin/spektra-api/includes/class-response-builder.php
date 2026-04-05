@@ -23,7 +23,7 @@ class Response_Builder {
 		// - Section assembly from ACF fields (P7.3)
 		// - Media normalization (P7.4)
 		return [
-			'meta'       => [],
+			'site'       => [],
 			'navigation' => [],
 			'pages'      => [],
 		];
