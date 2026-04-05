@@ -89,6 +89,7 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | 11 | `036ecf4` | fix: response-builder placeholder shape meta -> site |
 | 12 | `49d5a96` | feat: link-plugin.ps1 real impl + NAMESPACE fix (P4.3) |
 | 13 | `1f9db68` | feat: link-overlay.ps1 real impl + target validation (P4.4) |
+| 14 | `43c4456` | fix: config path __DIR__ -> WP_PLUGIN_DIR + ACF loader (P4.5) |
 
 ---
 
@@ -371,6 +372,42 @@ scripts/
 ### Státusz
 
 ✅ Pusholva.
+
+---
+
+## #14 -- WP_PLUGIN_DIR fix + ACF field group loader (2026-04-05) . `43c4456`
+
+**Commit:** `fix: config path __DIR__ -> WP_PLUGIN_DIR + add ACF field group loader (P4.5)`
+
+### Mi valtozott
+
+1. **spektra-api.php config path fix:**
+   - `__DIR__ . '/../spektra-config/config.php'` --> `WP_PLUGIN_DIR . '/spektra-config/config.php'`
+   - Ok: `__DIR__` Junction-on at a valos forras utvonalra old fel (`sp-infra/plugin/spektra-api/`),
+     nem a `wp-content/plugins/` konyvtarra. Igy a `../spektra-config/` soha nem talalt.
+   - `WP_PLUGIN_DIR` a tenyleges plugins mappat adja, ahol a `spektra-config` Junction el.
+
+2. **ACF field group loader hozzaadva:**
+   - `dirname($spektra_config_path) . '/acf/field-groups.php'` -- require_once
+   - A `field-groups.php` sajat `acf/init` hook-ban regisztral, tehat sima require eleg
+   - Ha a fajl nem letezik (mas kliens overlay), skip -- nem crashel
+
+### Runtime hatas
+
+- Config betoltodes: `config.php` most tenyleg betoltodik (korabban csendben `[]` volt)
+- 10 ACF field group regisztralva: BC Hero, BC Brand, BC Gallery, BC Services, BC Service,
+  BC About, BC Team, BC Assistance, BC Contact, BC Map (osszesen 51 mezo)
+- Endpoint: 200 OK, nincs fatal error, `debug.log` ures
+
+### Bug jelleg
+
+Ez egy **P4.4-bol oroklott latens bug** volt: a `spektra-config` Junction letrejott,
+de az `__DIR__` feloldas miatt a plugin soha nem talalta meg. A 200 OK valasz elfeddte,
+mert a placeholder response nem fugg a configtol.
+
+### Statusz
+
+Pusholva.
 
 ---
 
