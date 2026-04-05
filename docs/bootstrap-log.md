@@ -375,6 +375,41 @@ scripts/
 
 ---
 
+## #16 -- class-rest-controller.php real impl (2026-04-05) · `0f7a129`
+
+**Commit:** `feat: rest-controller -- schema, validate preview, version+cache headers (P5.2)`
+
+### Mi változott
+
+1. **Preview param schema + validáció:**
+   - `args` tömb hozzáadva a `register_rest_route`-hoz
+   - `validate_callback`: csak `'true'` elfogadott, minden más → 400 + `WP_Error`
+   - `sanitize_callback`: `sanitize_text_field` (WP beépített)
+   - Hiányzó param = normál mód (nincs validáció hiba)
+
+2. **Response headerek:**
+   - `X-Spektra-Version: 0.1.0` — minden válaszban
+   - `Cache-Control: no-cache` — csak preview módban
+   - Publikus mód: nincs cache policy (nem P5.2 scope)
+
+3. **Phase 5.2 placeholder kommentek eltávolítva**
+
+### Smoke test eredmények
+
+| Kérés | Státusz | X-Spektra-Version | Cache-Control |
+|---|---|---|---|
+| `GET /site` | 200 | `0.1.0` | — |
+| `GET /site?preview=true` | 200 | `0.1.0` | `no-cache` |
+| `GET /site?preview=yes` | 400 | — | — |
+
+400 body: `{"code":"rest_invalid_param","message":"Invalid parameter(s): preview",...}`
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
 ## #15 -- spektra-api.php finalize (2026-04-05) · `9b0321f`
 
 **Commit:** `refactor: spektra-api.php finalize -- add API_URL, clean Phase 5 comments (P5.1)`
