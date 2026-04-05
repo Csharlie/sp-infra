@@ -8,7 +8,7 @@
  * Phase history:
  *   P7.1: skeleton — method structure, contract-safe defaults.
  *   P7.2: site meta + navigation from config + WP core.
- *   P7.3: section assembly via spektra_get_section_data().
+ *   P7.3: section assembly — config-driven loop + spektra_get_section_data().
  *   P7.4: media normalization integration.
  *
  * Future direction: native WordPress menu integration (Phase 11.5).
@@ -44,7 +44,7 @@ class Response_Builder {
 		return [
 			'site'       => $this->build_site_meta( $config ),
 			'navigation' => $this->build_navigation( $config ),
-			'pages'      => $this->build_pages(),
+			'pages'      => $this->build_pages( $config ),
 		];
 	}
 
@@ -148,13 +148,12 @@ class Response_Builder {
 	/**
 	 * Build the pages array.
 	 *
-	 * P7.3: config-driven section loop per page.
-	 *
+	 * @param array $config Client config.
 	 * @return array Page[]
 	 */
-	private function build_pages(): array {
+	private function build_pages( array $config ): array {
 		return [
-			$this->build_page( 'home' ),
+			$this->build_page( 'home', $config ),
 		];
 	}
 
@@ -162,16 +161,55 @@ class Response_Builder {
 	 * Build a single Page shape.
 	 *
 	 * Platform contract: { slug: string, title?, meta?, sections: Section[] }
-	 * P7.3: sections populated via config iteration + spektra_get_section_data().
 	 *
-	 * @param string $slug Page slug.
+	 * @param string $slug   Page slug.
+	 * @param array  $config Client config.
 	 * @return array Page
 	 */
-	private function build_page( string $slug ): array {
+	private function build_page( string $slug, array $config ): array {
 		return [
 			'slug'     => $slug,
-			'sections' => [],
+			'sections' => $this->build_sections( $config ),
 		];
+	}
+
+	/**
+	 * Build sections from config-driven slug list.
+	 *
+	 * Iterates config['sections'], calls spektra_get_section_data() for each,
+	 * and wraps non-null results in the Section shape { id, type, data }.
+	 *
+	 * @param array $config Client config.
+	 * @return array Section[]
+	 */
+	private function build_sections( array $config ): array {
+		$post_id  = $this->get_front_page_id();
+		$slugs    = $config['sections'] ?? [];
+		$sections = [];
+
+		if ( $post_id === 0 ) {
+			return $sections;
+		}
+
+		foreach ( $slugs as $slug ) {
+			if ( ! is_string( $slug ) || $slug === '' ) {
+				continue;
+			}
+
+			$data = \spektra_get_section_data( $slug, $post_id );
+
+			if ( $data === null ) {
+				continue;
+			}
+
+			$sections[] = [
+				'id'   => $slug,
+				'type' => $slug,
+				'data' => $data,
+			];
+		}
+
+		return $sections;
 	}
 
 	/**

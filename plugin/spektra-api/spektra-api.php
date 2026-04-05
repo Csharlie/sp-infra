@@ -54,6 +54,14 @@ if ( file_exists( $spektra_acf_path ) ) {
 	require_once $spektra_acf_path;
 }
 
+// === ACF data layer ===
+// Helpers and section builders for reading ACF field data at runtime.
+// Load order matters: sections.php depends on helpers.php (spektra_get_field).
+$spektra_acf_dir = dirname( __FILE__, 3 ) . '/acf';
+require_once $spektra_acf_dir . '/helpers.php';
+require_once $spektra_acf_dir . '/media-helper.php';
+require_once $spektra_acf_dir . '/sections.php';
+
 // === Hook registration ===
 
 add_action( 'rest_api_init', [ Spektra\API\Rest_Controller::class, 'register_routes' ] );
