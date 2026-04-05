@@ -26,7 +26,36 @@ class Rest_Controller {
 				'methods'             => 'GET',
 				'callback'            => [ self::class, 'handle_request' ],
 				'permission_callback' => '__return_true',
+				'args'                => [
+					'preview' => [
+						'type'              => 'string',
+						'required'          => false,
+						'validate_callback' => [ self::class, 'validate_preview_param' ],
+						'sanitize_callback' => 'sanitize_text_field',
+					],
+				],
 			]
+		);
+	}
+
+	/**
+	 * Validate the preview parameter.
+	 *
+	 * Accepted: missing (not sent) or 'true'.
+	 * Rejected: anything else.
+	 *
+	 * @param string $value
+	 * @return true|\WP_Error
+	 */
+	public static function validate_preview_param( string $value ): true|\WP_Error {
+		if ( $value === 'true' ) {
+			return true;
+		}
+
+		return new \WP_Error(
+			'invalid_preview',
+			'The preview parameter only accepts the value "true".',
+			[ 'status' => 400 ]
 		);
 	}
 
@@ -37,13 +66,18 @@ class Rest_Controller {
 	 * @return \WP_REST_Response
 	 */
 	public static function handle_request( \WP_REST_Request $request ): \WP_REST_Response {
-		// Phase 5.2: real implementation.
-		// Phase 7: response builder integration.
 		$is_preview = $request->get_param( 'preview' ) === 'true';
 
 		$builder  = new Response_Builder();
-		$response = $builder->build( $is_preview );
+		$data     = $builder->build( $is_preview );
+		$response = new \WP_REST_Response( $data, 200 );
 
-		return new \WP_REST_Response( $response, 200 );
+		$response->header( 'X-Spektra-Version', SPEKTRA_API_VERSION );
+
+		if ( $is_preview ) {
+			$response->header( 'Cache-Control', 'no-cache' );
+		}
+
+		return $response;
 	}
 }
