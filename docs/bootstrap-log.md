@@ -652,6 +652,44 @@ scripts/
 
 ---
 
+## #23 -- bc-brand.logo rollback to URL string (2026-04-06) · `fef8893`
+
+**Commit:** `fix(acf): rollback bc-brand.logo to URL string (P7.4.1)`
+
+### Mi változott
+
+**`acf/sections.php` — bc-brand.brands[].logo visszaállítva URL stringre:**
+
+- P7.4 `spektra_normalize_media()` → Media objektumot adott vissza
+- Frontend `bc-brand.schema.ts` `logo?: string`-et vár, component `<img src={brand.logo}>` -ként használja
+- Media objektum → `[object Object]` lenne img src-ben → **contract drift**
+- Megoldás: ACF image array-ből URL string kinyerése inline (`$logo['url']`)
+- Azonos pattern mint bc-gallery: flat string amíg P8 mapper nem létezik
+
+### Érintett mezők — végső állapot P7.4.1 után
+
+| Mező | Kimenet | Miért |
+|---|---|---|
+| bc-hero.backgroundImage | `Media\|null` | ✅ frontend schema `Media`-t vár |
+| bc-about.image | `Media\|null` | ✅ frontend schema `Media`-t vár |
+| bc-team.members[].image | `Media\|null` | ✅ frontend schema `Media`-t vár |
+| bc-brand.brands[].logo | `string` | ⚠️ frontend schema `string`-et vár — P8-ra normalizálódik |
+| bc-gallery.images[].src | `string` | ⚠️ frontend schema `string`-et vár — P8-ra normalizálódik |
+
+### Teszteredmények
+
+| Teszt | Eredmény |
+|---|---|
+| PHP lint | ✅ |
+| hero.backgroundImage is Media\|null | ✅ |
+| brand.brands[*].logo is string | ✅ |
+| about.image is Media\|null | ✅ |
+| team.members[*].image is Media\|null | ✅ |
+| gallery.images[*].src NOT normalized | ✅ |
+| **11/11 PASS** | ✅ |
+
+---
+
 ## #22 -- Media normalization (2026-04-06) · `486a436`
 
 **Commit:** `feat(P7.4): media normalization — ACF image → canonical Media shape`
@@ -661,7 +699,7 @@ scripts/
 **`acf/sections.php` — 4 image mező normalizálva `spektra_normalize_media()` hívással:**
 
 1. **bc-hero.backgroundImage** — `spektra_get_field(…)` → `spektra_normalize_media( spektra_get_field(…) )`
-2. **bc-brand.brands[].logo** — `$row['logo'] ?? null` → `spektra_normalize_media( $row['logo'] ?? null )`
+2. **bc-brand.brands[].logo** — `$row['logo'] ?? null` → `spektra_normalize_media( $row['logo'] ?? null )` *(P7.4.1-ben visszaállítva URL stringre)*
 3. **bc-about.image** — `spektra_get_field(…)` → `spektra_normalize_media( spektra_get_field(…) )`
 4. **bc-team.members[].image** — `$row['image'] ?? null` → `spektra_normalize_media( $row['image'] ?? null )`
 
@@ -688,7 +726,7 @@ scripts/
 |---|---|
 | PHP lint | ✅ |
 | hero.backgroundImage is Media\|null | ✅ |
-| brand.brands[*].logo is Media\|null | ✅ |
+| brand.brands[*].logo is Media\|null | ✅ *(P7.4.1-ben string-re rollback)* |
 | about.image is Media\|null | ✅ |
 | team.members[*].image is Media\|null | ✅ |
 | gallery.images[*].src NOT normalized | ✅ |
