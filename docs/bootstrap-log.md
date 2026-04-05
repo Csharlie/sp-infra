@@ -419,7 +419,65 @@ scripts/
 
 ---
 
-## #16 -- class-rest-controller.php real impl (2026-04-05) · `0f7a129`
+## #18 -- ACF helpers finalize + media-helper.php (2026-04-05) · `ed775ee`
+
+**Commit:** `feat: ACF helpers finalize + media-helper.php (P6.1)`
+
+### Mi változott
+
+1. **`spektra_get_field()` — új függvény (helpers.php):**
+   - Safe wrapper `get_field()` köré
+   - `$default` értéket ad vissza ha a mező üres/hiányzik (nem `false`-t)
+   - Ha ACF nincs betöltve → `$default` (nem fatal error)
+
+2. **`spektra_acf_sizes_to_variants()` — valódi implementáció (helpers.php):**
+   - ACF sizes tömb iterálása: `thumbnail`, `medium`, `large`, stb.
+   - Width/height párosítás: `$key . '-width'` / `$key . '-height'` konvenció
+   - Output: `MediaVariant[]` — `{ name, source: { url, width, height } }`
+
+3. **`spektra_acf_group_to_cta()` — CTA field name fix (helpers.php):**
+   - Régi: `label` / `url` / `target` → nem egyezett a platform type-pal
+   - Új: `text` / `href` — illeszkedik a `CallToAction { text: string, href?: string }` típushoz
+   - `target` eltávolítva (nincs a platform contract-ban)
+
+4. **`spektra_normalize_media()` — új fájl (media-helper.php):**
+   - Univerzális media normalizer
+   - ACF image array → `Media` shape (delegál `image_to_media`-nak)
+   - URL string → minimális `Media` shape (`src` only)
+   - `null` / `false` / `''` → `null`
+
+5. **README.md frissítve:**
+   - Teljes függvény inventory
+   - Platform shape referencia
+
+### Teszteredmények
+
+| Teszt | Eredmény |
+|---|---|
+| 5/5 function_exists (standalone) | ✅ |
+| 5/5 function_exists (WP runtime) | ✅ |
+| sizes_to_variants: 3 variáns (thumb/medium/large) | ✅ |
+| CTA: text/href (nem label/url) | ✅ |
+| normalize_media(array) → Media | ✅ |
+| normalize_media(string) → Media | ✅ |
+| normalize_media(null) → null | ✅ |
+| normalize_media('') → null | ✅ |
+| get_field(no ACF) → fallback | ✅ |
+| get_field(missing, WP) → default | ✅ |
+
+### Boundary döntés
+
+- `spektra_get_section_data()` **nem** került P6.1-be — az section assembly logika, P7.3 scope
+- P6 = helper layer (nyers ACF → platform shape)
+- P7 = assembly layer (section → SiteData struktúra)
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
+## #17 -- class-cors.php real impl (2026-04-05) · `26a3f21`
 
 **Commit:** `feat: rest-controller -- schema, validate preview, version+cache headers (P5.2)`
 
