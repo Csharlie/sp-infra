@@ -612,6 +612,90 @@ scripts/
 
 ---
 
+## #21 -- Contract alignment fix (2026-04-05) · `31a6df3`
+
+**Commit:** `fix(P7.3.1): contract alignment + README + defensive guard`
+
+### Mi változott
+
+**`acf/sections.php` — Frontend site.ts contract igazítás (4 drift fix):**
+
+1. **bc-hero CTA keys** — `primaryCta` / `secondaryCta` → `primaryCTA` / `secondaryCTA`
+   - site.ts `primaryCTA` formát használ, a backend eltért
+2. **bc-service brands** — `[{ name: string }]` → `string[]`
+   - site.ts flat string tömböt vár, nem objektumokat
+3. **bc-assistance CTA** — `requestCta: { text, href }` → `requestLabel` + `requestHref`
+   - site.ts flat mezőket használ, nem CTA objektumot
+4. **bc-contact info** — `info: {}` → `contactInfo: {}`
+   - site.ts `contactInfo` kulcsnevet használ
+
+**`README.md` — Repo önleírás pontosítás:**
+
+- "NO client-specific code" kijelentés kiegészítve
+- Elismeri `acf/sections.php` bc-* tartalmat mint P11.3 technical debt
+
+**`class-response-builder.php` — Defensive guard:**
+
+- `$data === null` → `! is_array( $data )` a `build_sections()` loopban
+- Védelem jövőbeli hibás return típus ellen
+
+### Teszteredmények
+
+| Teszt | Eredmény |
+|---|---|
+| PHP lint (2 fájl) | ✅ |
+| Contract-aligned runtime teszt | 64/64 PASS ✅ |
+| bc-hero: primaryCTA / secondaryCTA | ✅ |
+| bc-service: brands[0] is string | ✅ |
+| bc-assistance: requestLabel / requestHref | ✅ |
+| bc-contact: contactInfo / contactInfo.phone | ✅ |
+
+---
+
+## #22 -- Media normalization (2026-04-06) · `486a436`
+
+**Commit:** `feat(P7.4): media normalization — ACF image → canonical Media shape`
+
+### Mi változott
+
+**`acf/sections.php` — 4 image mező normalizálva `spektra_normalize_media()` hívással:**
+
+1. **bc-hero.backgroundImage** — `spektra_get_field(…)` → `spektra_normalize_media( spektra_get_field(…) )`
+2. **bc-brand.brands[].logo** — `$row['logo'] ?? null` → `spektra_normalize_media( $row['logo'] ?? null )`
+3. **bc-about.image** — `spektra_get_field(…)` → `spektra_normalize_media( spektra_get_field(…) )`
+4. **bc-team.members[].image** — `$row['image'] ?? null` → `spektra_normalize_media( $row['image'] ?? null )`
+
+**bc-gallery.images[].src — SZÁNDÉKOSAN nem módosítva:**
+- Frontend jelenleg `string`-et vár (`src: "https://..."`)
+- Normalizálás `Media` objektumot adna → contract drift
+- P8 mapper scope-ba tartozik
+
+**Header frissítés:**
+- Depends on: `+ media-helper.php (spektra_normalize_media)`
+- Phase history: `+ P7.4: media normalization`
+
+### Normalizálási szabályok
+
+| Input | Output |
+|---|---|
+| Valid ACF image array | `{ src, alt, width, height, variants, mimeType }` |
+| URL string | `{ src, alt: '', width: null, height: null, variants: [], mimeType: null }` |
+| null / empty | `null` |
+
+### Teszteredmények
+
+| Teszt | Eredmény |
+|---|---|
+| PHP lint | ✅ |
+| hero.backgroundImage is Media\|null | ✅ |
+| brand.brands[*].logo is Media\|null | ✅ |
+| about.image is Media\|null | ✅ |
+| team.members[*].image is Media\|null | ✅ |
+| gallery.images[*].src NOT normalized | ✅ |
+| **11/11 PASS** | ✅ |
+
+---
+
 ## #18 -- ACF helpers finalize + media-helper.php (2026-04-05) · `ed775ee`
 
 **Commit:** `feat: ACF helpers finalize + media-helper.php (P6.1)`
