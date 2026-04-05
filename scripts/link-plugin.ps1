@@ -19,9 +19,20 @@ $PluginSource = Join-Path $WorkspaceRoot "sp-infra\plugin\spektra-api"
 $PluginTarget = Join-Path $WorkspaceRoot ".local\wp-runtimes\$Client\wp-content\plugins\spektra-api"
 
 if (Test-Path $PluginTarget) {
-    Write-Host "Plugin symlink already exists: $PluginTarget" -ForegroundColor Yellow
+    Write-Host "Plugin link already exists: $PluginTarget" -ForegroundColor Yellow
     return
 }
 
-# Phase 4.3: create symlink
-Write-Warning "link-plugin.ps1 is a scaffold -- real implementation in Phase 4.3."
+if (-not (Test-Path $PluginSource)) {
+    Write-Error "Plugin source not found: $PluginSource"
+    return
+}
+
+$PluginsDir = Split-Path $PluginTarget
+if (-not (Test-Path $PluginsDir)) {
+    Write-Error "WP plugins dir not found: $PluginsDir -- is WordPress installed for client '$Client'?"
+    return
+}
+
+New-Item -ItemType Junction -Path $PluginTarget -Target $PluginSource | Out-Null
+Write-Host "Plugin linked: $PluginTarget -> $PluginSource" -ForegroundColor Green

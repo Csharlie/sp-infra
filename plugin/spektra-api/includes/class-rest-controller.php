@@ -11,8 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 class Rest_Controller {
 
-	const NAMESPACE = 'spektra/v1';
-	const ROUTE     = '/site';
+	const API_NAMESPACE = 'spektra/v1';
+	const ROUTE         = '/site';
 
 	/**
 	 * Register REST routes.
@@ -20,7 +20,7 @@ class Rest_Controller {
 	 */
 	public static function register_routes(): void {
 		register_rest_route(
-			self::NAMESPACE,
+			self::API_NAMESPACE,
 			self::ROUTE,
 			[
 				'methods'             => 'GET',
