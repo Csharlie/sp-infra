@@ -75,7 +75,7 @@ function spektra_build_bc_hero( string $p, int $pid ): ?array {
 	$pct = spektra_get_field( $p . 'primary_cta_text', $pid );
 	$pch = spektra_get_field( $p . 'primary_cta_href', $pid );
 	if ( $pct !== null || $pch !== null ) {
-		$data['primaryCta'] = [
+		$data['primaryCTA'] = [
 			'text' => $pct ?? '',
 			'href' => $pch ?? '',
 		];
@@ -84,7 +84,7 @@ function spektra_build_bc_hero( string $p, int $pid ): ?array {
 	$sct = spektra_get_field( $p . 'secondary_cta_text', $pid );
 	$sch = spektra_get_field( $p . 'secondary_cta_href', $pid );
 	if ( $sct !== null || $sch !== null ) {
-		$data['secondaryCta'] = [
+		$data['secondaryCTA'] = [
 			'text' => $sct ?? '',
 			'href' => $sch ?? '',
 		];
@@ -205,8 +205,8 @@ function spektra_build_bc_service( string $p, int $pid ): ?array {
 		'services'    => array_map( function ( array $row ): array {
 			return [ 'label' => $row['label'] ?? '' ];
 		}, $services ),
-		'brands'      => array_map( function ( array $row ): array {
-			return [ 'name' => $row['name'] ?? '' ];
+		'brands'      => array_map( function ( array $row ): string {
+			return $row['name'] ?? '';
 		}, $brands ),
 	];
 
@@ -331,14 +331,8 @@ function spektra_build_bc_assistance( string $p, int $pid ): ?array {
 		'serviceArea' => spektra_get_field( $p . 'service_area', $pid, '' ),
 	];
 
-	$rl = spektra_get_field( $p . 'request_label', $pid );
-	$rh = spektra_get_field( $p . 'request_href', $pid );
-	if ( $rl !== null || $rh !== null ) {
-		$data['requestCta'] = [
-			'text' => $rl ?? '',
-			'href' => $rh ?? '',
-		];
-	}
+	$data['requestLabel'] = spektra_get_field( $p . 'request_label', $pid, '' );
+	$data['requestHref']  = spektra_get_field( $p . 'request_href', $pid, '' );
 
 	return $data;
 }
@@ -365,7 +359,7 @@ function spektra_build_bc_contact( string $p, int $pid ): ?array {
 
 	$info = spektra_get_field( $p . 'info', $pid );
 	if ( is_array( $info ) ) {
-		$data['info'] = [
+		$data['contactInfo'] = [
 			'phone'   => $info['phone'] ?? '',
 			'email'   => $info['email'] ?? '',
 			'address' => $info['address'] ?? '',

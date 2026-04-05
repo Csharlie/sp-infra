@@ -22,7 +22,7 @@ sp-platform/        ← Platform core (types, adapters, validation)
 sp-benettcar/       ← Client repo (frontend + infra overlay)
 ```
 
-**Key rule**: This repo contains NO client-specific code. Client configuration lives in each client's `infra/` overlay directory.
+**Key rule**: This repo contains NO client-specific code *except* `acf/sections.php`, which currently holds Benettcar-specific (`bc-*`) section builders as a pragmatic v1 vertical-slice decision. This is tracked as technical debt — Phase 11.3 will extract reusable patterns into a generic section builder base.
 
 ## Related
 

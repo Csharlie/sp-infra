@@ -198,7 +198,7 @@ class Response_Builder {
 
 			$data = \spektra_get_section_data( $slug, $post_id );
 
-			if ( $data === null ) {
+			if ( ! is_array( $data ) ) {
 				continue;
 			}
 
