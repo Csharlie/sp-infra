@@ -86,6 +86,7 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | 9 | `ff77870` | fix: replace em-dash with ASCII in scripts (P2.5) |
 | — | `91e1644` | fix: bootstrap-log #9 hash correction (meta) |
 | 10 | `36626be` | refactor: config loader return-array pattern (P3.1) |
+| 11 | `036ecf4` | fix: response-builder placeholder shape meta -> site |
 
 ---
 
@@ -371,7 +372,29 @@ scripts/
 
 ---
 
-## #10 — Config loader return-array pattern (2026-04-05) · `36626be`
+## #11 -- Response-builder contract fix (2026-04-05) . `036ecf4`
+
+**Commit:** `fix: response-builder placeholder shape meta -> site -- match SiteData contract`
+
+### Mi valtozott
+
+- `class-response-builder.php`: placeholder return shape `'meta' => []` atirva `'site' => []`-ra
+- A platform SiteData contract `site / navigation / pages` shape-et var, nem `meta`
+- 1 soros fix, nincs funkcionalis valtozas (a builder meg placeholder)
+
+### Miert most
+
+- User review eszrevette a contract mismatch-et
+- Barmely downstream kod ami a placeholder-re nez, mar a helyes shape-et latja
+- Phase 7-ben a valos implementacio mar a helyes shape-bol indul
+
+### Statusz
+
+:white_check_mark: Pusholva.
+
+---
+
+## #10 -- Config loader return-array pattern (2026-04-05) . `36626be`
 
 **Commit:** `refactor: config loader uses return-array pattern + SPEKTRA_CLIENT_CONFIG constant (P3.1)`
 
