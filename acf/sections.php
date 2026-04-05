@@ -9,7 +9,8 @@
  * - Required field missing → return null (section skipped by caller)
  * - Optional field missing → key present with null/empty/default value
  * - Image fields normalized via spektra_normalize_media() → Media | null
- *   (exception: bc-gallery images[].src stays raw — P8 handles it)
+ *   (exceptions: bc-gallery images[].src and bc-brand brands[].logo stay
+ *   as URL strings — frontend schemas expect string, P8 mapper handles it)
  * - Output keys are camelCase (matches platform TypeScript contracts)
  * - bc-* specific — acknowledged as P11.3 technical debt
  *
@@ -18,6 +19,7 @@
  * Phase history:
  *   P7.3: initial implementation — 10 bc-* section builders.
  *   P7.4: media normalization — ACF image → canonical Media shape.
+ *   P7.4.1: bc-brand.logo rolled back to URL string (frontend contract).
  *
  * @package Spektra\ACF
  */
