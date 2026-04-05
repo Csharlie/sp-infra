@@ -88,6 +88,7 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | 10 | `36626be` | refactor: config loader return-array pattern (P3.1) |
 | 11 | `036ecf4` | fix: response-builder placeholder shape meta -> site |
 | 12 | `49d5a96` | feat: link-plugin.ps1 real impl + NAMESPACE fix (P4.3) |
+| 13 | `1f9db68` | feat: link-overlay.ps1 real impl + target validation (P4.4) |
 
 ---
 
@@ -370,6 +371,39 @@ scripts/
 ### Státusz
 
 ✅ Pusholva.
+
+---
+
+## #13 -- link-overlay.ps1 real impl (2026-04-05) . `1f9db68`
+
+**Commit:** `feat: link-overlay.ps1 real impl -- Junction + target validation (P4.4)`
+
+### Mi valtozott
+
+- **scripts/link-overlay.ps1** -- scaffold lecserelve valos implementaciora:
+  - `New-Item -ItemType Junction` -- kliens overlay (`sp-benettcar/infra/`) belinkelese `spektra-config/` neven
+  - Target validation: ha junction mar letezik, ellenorzi, hogy a helyes source-ra mutat-e
+  - Ha rossz target-re mutat: error + manualis torlest ker (nem csereli csendben)
+  - Ha helyes target: skip (idempotens)
+  - Source/plugins dir guard: ha nem letezik, error
+
+### Runtime hatas
+
+- Junction letrehozva: `.local/wp-runtimes/benettcar/wp-content/plugins/spektra-config` -> `sp-clients/sp-benettcar/infra`
+- `spektra-api.php` fallback path (`__DIR__ . '/../spektra-config/config.php'`) most talal fajlt
+- Plugin aktiv maradt, nem crashelt
+- Endpoint: `http://benettcar.local/wp-json/spektra/v1/site` -> 200 OK (placeholder shape)
+- `debug.log` nem jott letre (nincs error)
+
+### Architektura megjegyzes
+
+Ez a symlink fallback a **jelenlegi runtime stratégia**. Kesobb a `bootstrap.ps1` ugyanezt
+a logikát hivja scriptbol, a `wp-config.php.tpl` + ENV-driven path pedig a vegleges modell.
+A script ugy epult, hogy abba a flow-ba illeszkedjen.
+
+### Statusz
+
+Pusholva.
 
 ---
 
