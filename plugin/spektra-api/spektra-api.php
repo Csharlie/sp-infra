@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
 
 define( 'SPEKTRA_API_VERSION', '0.1.0' );
 define( 'SPEKTRA_API_PATH', plugin_dir_path( __FILE__ ) );
+define( 'SPEKTRA_API_URL', plugin_dir_url( __FILE__ ) );
 
 // === Autoload includes ===
 
@@ -54,8 +55,6 @@ if ( file_exists( $spektra_acf_path ) ) {
 }
 
 // === Hook registration ===
-// REST route + CORS hooks registered on rest_api_init.
-// Implementation: Phase 5.
 
 add_action( 'rest_api_init', [ Spektra\API\Rest_Controller::class, 'register_routes' ] );
 add_action( 'rest_api_init', [ Spektra\API\CORS::class, 'register_hooks' ] );
