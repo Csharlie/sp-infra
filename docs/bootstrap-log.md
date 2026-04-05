@@ -652,6 +652,44 @@ scripts/
 
 ---
 
+## #24 -- Full SiteData endpoint validation (2026-04-06) · `8e87043`
+
+**Phase:** P7.5 — validation only, no code changes
+
+### Validation method
+
+1. **p75-dump.php** — PHP CLI, `Response_Builder->build()` → `p75-sitedata.json` (11 KB, 1 page, 10 sections)
+2. **p75-validate.mjs** — Node.js, imports `validateSiteData()` from `sp-platform/packages/data/dist/validate.js`
+
+### Layer 1 — Platform `validateSiteData()`
+
+| Check | Result |
+|---|---|
+| `validateSiteData(siteData)` | ✅ `valid: true` |
+
+Validated: site meta, navigation (primary NavItem[]), pages (min 1), sections (id+type+data), optional meta/ogImage.
+
+### Layer 2 — Consumer compatibility
+
+| Check | Result |
+|---|---|
+| bc-hero.backgroundImage → Media\|null | ✅ |
+| bc-about.image → Media\|null | ✅ |
+| bc-team.members[*].image → Media\|null | ✅ (3 members) |
+| bc-brand.brands[*].logo → string | ✅ (3 brands, P7.4.1) |
+| bc-gallery.images[*].src → string\|null | ✅ (2 images) |
+| Null policy (optional fields) | ✅ |
+| Section integrity (id+type+data, 10 sections) | ✅ |
+
+### Eredmény
+
+| | |
+|---|---|
+| **Összesített** | **45/45 PASS** |
+| **P7.5** | **PASS** |
+
+---
+
 ## #23 -- bc-brand.logo rollback to URL string (2026-04-06) · `fef8893`
 
 **Commit:** `fix(acf): rollback bc-brand.logo to URL string (P7.4.1)`
