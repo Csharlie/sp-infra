@@ -112,9 +112,10 @@ function spektra_build_bc_brand( string $p, int $pid ): ?array {
 		'title'       => spektra_get_field( $p . 'title', $pid, '' ),
 		'description' => spektra_get_field( $p . 'description', $pid, '' ),
 		'brands'      => array_map( function ( array $row ): array {
+			$logo = $row['logo'] ?? null;
 			return [
 				'name'   => $row['name'] ?? '',
-				'logo'   => spektra_normalize_media( $row['logo'] ?? null ),
+				'logo'   => is_array( $logo ) ? ( $logo['url'] ?? '' ) : ( $logo ?? '' ),
 				'alt'    => $row['alt'] ?? '',
 				'invert' => (bool) ( $row['invert'] ?? false ),
 			];
