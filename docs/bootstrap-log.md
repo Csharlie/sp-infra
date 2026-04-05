@@ -84,6 +84,8 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | 8 | `e77e7b6` | feat: add seed/ + scripts/ scaffolds (P2.4) |
 | — | `2652b0b` | fix: bootstrap-log #8 hash correction (meta) |
 | 9 | `ff77870` | fix: replace em-dash with ASCII in scripts (P2.5) |
+| — | `91e1644` | fix: bootstrap-log #9 hash correction (meta) |
+| 10 | `26ea334` | refactor: config loader return-array pattern (P3.1) |
 
 ---
 
@@ -362,6 +364,34 @@ scripts/
 - P2.5 siker-kritérium: "Script-ek futtathatók (még üres logikával)"
 - Mind a 4 script tesztelve: `bootstrap.ps1`, `link-plugin.ps1`, `link-overlay.ps1`, `setup-env.ps1`
 - Mindegyik hibátlanul fut és WARNING-gal jelzi a scaffold státuszt
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
+## #10 — Config loader return-array pattern (2026-04-05) · `26ea334`
+
+**Commit:** `refactor: config loader uses return-array pattern + SPEKTRA_CLIENT_CONFIG constant (P3.1)`
+
+### Mi változott
+
+- `spektra-api.php`: config loading átírva `require_once` → `$config = require`
+- A betöltött config.php-nak `return []` -t kell adnia (nem globális változókat)
+- `is_array()` guard: ha a config nem tömböt ad vissza, üres tömbbel inicializál
+- `SPEKTRA_CLIENT_CONFIG` konstans: a plugin többi része ebből olvassa a config-ot
+
+### Cross-repo: sp-benettcar `79c7c37`
+
+- `infra/config.php` átírva placeholder → valós `return []` konfiguráció
+- Kulcsok: `client_slug`, `client_name`, `allowed_origins` (`http://localhost:5174`), `site_defaults` (lang, title), `sections` (10 db bc-* slug)
+
+### Döntések
+
+1. **Return-array pattern** a constants/globals helyett — tisztább, tesztelhetőbb
+2. **SPEKTRA_CLIENT_CONFIG** = define() konstans — a CORS, Response_Builder, stb. innen olvassa
+3. **Port 5174** az allowed_origins-ben — sp-benettcar vite.config.ts explicit port override
 
 ### Státusz
 

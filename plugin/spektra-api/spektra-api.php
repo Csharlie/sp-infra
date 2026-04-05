@@ -29,10 +29,16 @@ require_once SPEKTRA_API_PATH . 'includes/class-response-builder.php';
 // Real config comes from sp-benettcar/infra/config.php (symlinked at runtime).
 
 $spektra_config_path = getenv( 'SPEKTRA_CLIENT_CONFIG' ) ?: __DIR__ . '/../spektra-config/config.php';
+$spektra_config      = [];
 
 if ( file_exists( $spektra_config_path ) ) {
-	require_once $spektra_config_path;
+	$spektra_config = require $spektra_config_path;
+	if ( ! is_array( $spektra_config ) ) {
+		$spektra_config = [];
+	}
 }
+
+define( 'SPEKTRA_CLIENT_CONFIG', $spektra_config );
 
 // === Hook registration ===
 // REST route + CORS hooks registered on rest_api_init.
