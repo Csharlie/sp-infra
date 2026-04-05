@@ -1,14 +1,18 @@
 <?php
 /**
- * Response Builder — assembles SiteData-compatible JSON from ACF fields.
+ * Response Builder — assembles SiteData-compatible JSON from config + WP runtime.
  *
  * Platform contract (SiteData):
  *   { site: SiteMeta, navigation: Navigation, pages: Page[] }
  *
- * P7.1: skeleton only — no ACF reads, no config, no helpers.
- * P7.2: site meta + navigation from config + ACF.
- * P7.3: section assembly via spektra_get_section_data().
- * P7.4: media normalization integration.
+ * Phase history:
+ *   P7.1: skeleton — method structure, contract-safe defaults.
+ *   P7.2: site meta + navigation from config + WP core.
+ *   P7.3: section assembly via spektra_get_section_data().
+ *   P7.4: media normalization integration.
+ *
+ * Future direction: native WordPress menu integration (Phase 11.5).
+ * Phase 7.2 remains config-driven on purpose.
  *
  * @package Spektra\API
  */
@@ -27,45 +31,118 @@ class Response_Builder {
 	/**
 	 * Build the full SiteData response.
 	 *
+	 * Config is loaded here (not in constructor) to keep the builder stateless.
+	 *
 	 * @param bool $is_preview Whether to include draft/preview content.
 	 * @return array SiteData-compatible associative array.
 	 */
 	public function build( bool $is_preview = false ): array {
 		$this->is_preview = $is_preview;
 
+		$config = $this->load_config();
+
 		return [
-			'site'       => $this->build_site_meta(),
-			'navigation' => $this->build_navigation(),
+			'site'       => $this->build_site_meta( $config ),
+			'navigation' => $this->build_navigation( $config ),
 			'pages'      => $this->build_pages(),
 		];
+	}
+
+	/**
+	 * Load client overlay config.
+	 *
+	 * @return array Config array, or empty array if missing.
+	 */
+	private function load_config(): array {
+		$path = WP_PLUGIN_DIR . '/spektra-config/config.php';
+
+		if ( ! file_exists( $path ) ) {
+			return [];
+		}
+
+		$config = require $path;
+
+		return is_array( $config ) ? $config : [];
 	}
 
 	/**
 	 * Build SiteMeta shape.
 	 *
 	 * Platform contract: { name: string, description?, url?, locale? }
-	 * P7.2: populated from config site_defaults + WP options.
 	 *
+	 * Precedence: config override → WP runtime → fallback.
+	 *
+	 * @param array $config Client config.
 	 * @return array SiteMeta
 	 */
-	private function build_site_meta(): array {
+	private function build_site_meta( array $config ): array {
+		$defaults = $config['site_defaults'] ?? [];
+
 		return [
-			'name' => '',
+			'name'        => $defaults['title'] ?? get_bloginfo( 'name' ) ?: '',
+			'description' => get_bloginfo( 'description' ) ?: '',
+			'url'         => home_url( '/' ),
+			'locale'      => $this->normalize_locale( get_locale() ),
 		];
+	}
+
+	/**
+	 * Normalize a WP locale string to BCP 47 format.
+	 *
+	 * WP uses underscores (hu_HU), BCP 47 uses hyphens (hu-HU).
+	 *
+	 * @param string $locale WP locale string.
+	 * @return string BCP 47 locale.
+	 */
+	private function normalize_locale( string $locale ): string {
+		return str_replace( '_', '-', $locale );
 	}
 
 	/**
 	 * Build Navigation shape.
 	 *
 	 * Platform contract: { primary: NavItem[], footer?: NavItem[] }
-	 * P7.2: populated from config or WP menus.
 	 *
+	 * Source: config['navigation']['primary'] — curated list.
+	 * Future: native WordPress menu integration (Phase 11.5).
+	 *
+	 * @param array $config Client config.
 	 * @return array Navigation
 	 */
-	private function build_navigation(): array {
+	private function build_navigation( array $config ): array {
+		$nav_config = $config['navigation'] ?? [];
+		$primary    = $nav_config['primary'] ?? [];
+
+		$items = array_map( [ $this, 'normalize_nav_item' ], $primary );
+
 		return [
-			'primary' => [],
+			'primary' => array_values( $items ),
 		];
+	}
+
+	/**
+	 * Normalize a raw config nav item to the canonical NavItem shape.
+	 *
+	 * Platform contract: { label: string, href: string, children?, external? }
+	 *
+	 * @param array $item Raw config nav item.
+	 * @return array NavItem
+	 */
+	private function normalize_nav_item( array $item ): array {
+		$normalized = [
+			'label' => $item['label'] ?? '',
+			'href'  => $item['href'] ?? '',
+		];
+
+		if ( ! empty( $item['external'] ) ) {
+			$normalized['external'] = true;
+		}
+
+		if ( ! empty( $item['children'] ) && is_array( $item['children'] ) ) {
+			$normalized['children'] = array_map( [ $this, 'normalize_nav_item' ], $item['children'] );
+		}
+
+		return $normalized;
 	}
 
 	/**
