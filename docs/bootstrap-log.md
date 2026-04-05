@@ -529,6 +529,83 @@ scripts/
 - Locale: WP-ből (`get_locale()`), BCP 47-re normalizálva
 - Future: WP native menu integration → Phase 11.5
 
+---
+
+## #20 -- Section assembly (2026-04-05) · `6c1d84d`
+
+**Commit:** `P7.3: section assembly — config-driven loop + spektra_get_section_data()`
+
+### Mi változott
+
+**`acf/sections.php` — ÚJ fájl: section data dispatcher + 10 bc-* builder:**
+
+1. **`spektra_get_section_data( $type, $post_id )`** — Központi dispatcher
+   - Prefix levezetés: `bc-hero` → `bc_hero_` (ACF naming convention)
+   - `match` expression: 10 bc-* slug → per-section builder
+   - Ismeretlen slug → `null` (section kihagyva)
+
+2. **Per-section builder funkciók** (10 db):
+   - `spektra_build_bc_hero` — title, subtitle, description, backgroundImage, primaryCta, secondaryCta
+   - `spektra_build_bc_brand` — title, description, brands[] (name, logo, alt, invert)
+   - `spektra_build_bc_gallery` — title, subtitle, showCategories, images[] (src, alt, category, caption)
+   - `spektra_build_bc_services` — title, subtitle, services[] (title, icon, description)
+   - `spektra_build_bc_service` — title, subtitle, description, services[], brands[], contact group
+   - `spektra_build_bc_about` — title, subtitle, content[], image, imagePosition, colorScheme, stats[], cta
+   - `spektra_build_bc_team` — title, subtitle, description, members[] (name, role, image, phone, email)
+   - `spektra_build_bc_assistance` — title, subtitle, description, serviceArea, requestCta
+   - `spektra_build_bc_contact` — title, subtitle, description, info group, colorScheme
+   - `spektra_build_bc_map` — title, query, height
+
+3. **Null-safety szabályok:**
+   - Required field `null` → teljes section `null` (kihagyva)
+   - Optional field `null` → default érték (`''`, `[]`, `null`)
+   - Image mezők: raw ACF array (P7.4 normalizál)
+   - CTA-k: csak ha legalább text vagy href létezik
+
+**`class-response-builder.php` — Section assembly integráció:**
+
+1. **`build()` → `build_pages( $config )`** — config átadás
+2. **`build_page( $slug, $config )`** — config átadás build_sections-nek
+3. **`build_sections( array $config )`** — ÚJ metódus
+   - Forrás: `$config['sections']` (config.php-ből, NINCS hardkódolt lista)
+   - `get_front_page_id()` → post_id; ha 0 → üres sections
+   - Loop: slug → `\spektra_get_section_data()` → null check → Section shape
+   - Section shape: `{ id: slug, type: slug, data: array }`
+
+**`spektra-api.php` — ACF data layer betöltés:**
+
+- `require_once` a 3 acf/ fájlra: helpers.php, media-helper.php, sections.php
+- Betöltési sorrend: helpers → media-helper → sections (függőségi lánc)
+- Útvonal: `dirname( __FILE__, 3 ) . '/acf'`
+
+### Teszteredmények
+
+| Teszt | Eredmény |
+|---|---|
+| PHP lint (3 fájl) | ✅ |
+| Top-level struktúra (site, navigation, pages) | ✅ |
+| sections count = 10 | ✅ |
+| Minden section: id = type = slug | ✅ |
+| bc-hero: title, description, primaryCta | ✅ |
+| bc-brand: brands[] count >= 1 | ✅ |
+| bc-gallery: title, images[] | ✅ |
+| bc-services: services[] count >= 1 | ✅ |
+| bc-service: services[], brands[], contact | ✅ |
+| bc-about: content[], imagePosition, stats[] | ✅ |
+| bc-team: members[] count >= 1 | ✅ |
+| bc-assistance: title, requestCta | ✅ |
+| bc-contact: title, info group | ✅ |
+| bc-map: query, height (int) | ✅ |
+| **60/60 PASS** | ✅ |
+
+### Architekturális döntések
+
+- Section lista `$config['sections']` — NINCS hardkódolt lista a builderben
+- Section-specifikus ACF olvasás `acf/sections.php`-ban — NEM response-builder.php-ban
+- Image: raw ACF array marad — P7.4 normalizálja
+- Output kulcsok camelCase (TypeScript platform contract)
+- bc-* specifikus kód sp-infra-ban — pragmatikus, P11.3 technical debt
+
 ### Státusz
 
 ✅ Pusholva. sp-infra `0edd00f`, sp-benettcar `e4aa10f`.
