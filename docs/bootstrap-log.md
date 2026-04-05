@@ -85,7 +85,7 @@ sp-benettcar ← függ sp-platform-tól (@spektra/types, @spektra/data)
 | — | `2652b0b` | fix: bootstrap-log #8 hash correction (meta) |
 | 9 | `ff77870` | fix: replace em-dash with ASCII in scripts (P2.5) |
 | — | `91e1644` | fix: bootstrap-log #9 hash correction (meta) |
-| 10 | `26ea334` | refactor: config loader return-array pattern (P3.1) |
+| 10 | `36626be` | refactor: config loader return-array pattern (P3.1) |
 
 ---
 
@@ -371,7 +371,7 @@ scripts/
 
 ---
 
-## #10 — Config loader return-array pattern (2026-04-05) · `26ea334`
+## #10 — Config loader return-array pattern (2026-04-05) · `36626be`
 
 **Commit:** `refactor: config loader uses return-array pattern + SPEKTRA_CLIENT_CONFIG constant (P3.1)`
 
