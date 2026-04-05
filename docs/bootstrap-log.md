@@ -465,6 +465,76 @@ scripts/
 
 ---
 
+## #19 -- Response Builder site meta + navigation (2026-04-05) · `0edd00f`
+
+**Commit:** `feat: response builder site meta + navigation assembly (P7.1+P7.2)`
+
+### Mi változott
+
+**`class-response-builder.php` — P7.1 skeleton + P7.2 valós assembly:**
+
+1. **`load_config()`** — Config betöltés `build()` elején (stateless)
+   - `WP_PLUGIN_DIR . '/spektra-config/config.php'`
+   - Defensive: `file_exists()` + `is_array()` check
+
+2. **`build_site_meta( array $config )`** — Valós SiteMeta assembly
+   - Precedence: config `site_defaults.title` → `get_bloginfo('name')` → `''`
+   - `description`: `get_bloginfo('description')`
+   - `url`: `home_url('/')`
+   - `locale`: `get_locale()` → BCP 47 normalizálás
+
+3. **`normalize_locale( string $locale )`** — WP `hu_HU` → BCP 47 `hu-HU`
+
+4. **`build_navigation( array $config )`** — Config-driven curated nav
+   - Forrás: `$config['navigation']['primary']`
+   - Nem ACF, nem WP menu, nem sections auto-gen
+   - Items normalizálva `normalize_nav_item()`-tel
+
+5. **`normalize_nav_item( array $item )`** — NavItem contract normalization
+   - `label`, `href` kötelező
+   - `external` opcionális (csak ha true)
+   - `children` rekurzív (jövőbiztos)
+
+6. **`build_pages()`, `build_page()`, `get_front_page_id()`** — P7.1 skeleton marad
+   - `pages[0].sections = []` — P7.3-ban töltjük
+
+### Config változás (sp-benettcar `e4aa10f`)
+
+`config.php` bővítve `navigation` blokkal:
+- 4 curated NavItem: Főoldal, Szolgáltatások, Rólunk, Kapcsolat
+- Átmeneti megoldás — Phase 11.5: native WP menu integration
+
+### Teszteredmények
+
+| Teszt | Eredmény |
+|---|---|
+| PHP lint (response-builder + config) | ✅ |
+| Top-level: site, navigation, pages (3 key) | ✅ |
+| site.name = "Benett Car" | ✅ |
+| site.url tartalmazza "benettcar" | ✅ |
+| site.locale BCP 47 (hyphen, no underscore) | ✅ |
+| navigation.primary: 4 item | ✅ |
+| nav[0] = Főoldal / "/" | ✅ |
+| nav[3] = Kapcsolat / "/#contact" | ✅ |
+| Minden NavItem: label + href | ✅ |
+| pages[0].slug = "home" | ✅ |
+| pages[0].sections = [] | ✅ |
+| Nincs top-level sections key | ✅ |
+| **30/30 PASS** | ✅ |
+
+### Architekturális döntések
+
+- Config loading `build()`-ben, nem constructor-ban — stateless builder
+- Navigation: config-driven curated list, nem auto-generated sections-ből
+- Locale: WP-ből (`get_locale()`), BCP 47-re normalizálva
+- Future: WP native menu integration → Phase 11.5
+
+### Státusz
+
+✅ Pusholva. sp-infra `0edd00f`, sp-benettcar `e4aa10f`.
+
+---
+
 ## #18 -- ACF helpers finalize + media-helper.php (2026-04-05) · `ed775ee`
 
 **Commit:** `feat: ACF helpers finalize + media-helper.php (P6.1)`
