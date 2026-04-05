@@ -419,6 +419,52 @@ scripts/
 
 ---
 
+## #19 -- Response Builder skeleton (2026-04-05) · `fa463f7`
+
+**Commit:** `feat: response-builder skeleton -- SiteData contract shape (P7.1)`
+
+### Mi változott
+
+**`class-response-builder.php` — teljes átírás (skeleton):**
+
+| Elem | Leírás |
+|---|---|
+| `$is_preview` property | `build()` elmenti, P7.2–P7.3 használni fogja |
+| `build()` | Delegál `build_site_meta()`, `build_navigation()`, `build_pages()`-nak |
+| `build_site_meta()` | Skeleton: `{ name: "" }` — P7.2 tölti fel |
+| `build_navigation()` | Skeleton: `{ primary: [] }` — P7.2 tölti fel |
+| `build_pages()` | Skeleton: `[ build_page('home') ]` — P7.3 bővíti |
+| `build_page($slug)` | Skeleton: `{ slug, sections: [] }` — P7.3 tölti fel |
+| `get_front_page_id()` | `(int) get_option('page_on_front', 0)` — kész |
+
+### P7.1 guardrails
+
+- ❌ Nincs ACF olvasás
+- ❌ Nincs config betöltés
+- ❌ Nincs helper require
+- ❌ Nincs section assembly
+- ❌ Nincs media normalization
+
+### Endpoint output
+
+```json
+{
+  "site": { "name": "" },
+  "navigation": { "primary": [] },
+  "pages": [{ "slug": "home", "sections": [] }]
+}
+```
+
+### Teszteredmények
+
+22/22 PASS — top-level keys, SiteMeta shape, Navigation shape, Page shape, preview mode, JSON encode.
+
+### Státusz
+
+✅ Pusholva.
+
+---
+
 ## #18 -- ACF helpers finalize + media-helper.php (2026-04-05) · `ed775ee`
 
 **Commit:** `feat: ACF helpers finalize + media-helper.php (P6.1)`
