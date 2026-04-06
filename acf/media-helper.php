@@ -42,6 +42,25 @@ function spektra_normalize_media( $value, string $alt_override = '' ): ?array {
 		return $media;
 	}
 
+	// Attachment ID (integer or numeric string) — resolve from WP media library.
+	// This happens when ACF stores the sideloaded attachment ID and get_field()
+	// doesn't format it back to the full image array (common in repeater sub-fields).
+	if ( is_numeric( $value ) && (int) $value > 0 ) {
+		$att_id   = (int) $value;
+		$img_data = wp_get_attachment_image_src( $att_id, 'full' );
+		if ( ! $img_data ) {
+			return null;
+		}
+		return [
+			'src'      => $img_data[0],
+			'alt'      => $alt_override ?: ( get_post_meta( $att_id, '_wp_attachment_image_alt', true ) ?: '' ),
+			'width'    => $img_data[1],
+			'height'   => $img_data[2],
+			'variants' => [],
+			'mimeType' => get_post_mime_type( $att_id ) ?: null,
+		];
+	}
+
 	// Plain URL string (return format = url, or manual input).
 	if ( is_string( $value ) && $value !== '' ) {
 		return [
@@ -55,4 +74,29 @@ function spektra_normalize_media( $value, string $alt_override = '' ): ?array {
 	}
 
 	return null;
+}
+
+/**
+ * Resolve any ACF image value to a plain URL string.
+ *
+ * Accepts: ACF image array, attachment ID (int/numeric string), URL string.
+ * Returns: URL string, or empty string if unresolvable.
+ *
+ * Use this for fields where the frontend expects a plain URL (not a Media shape),
+ * e.g. bc-brand logos, bc-gallery image src.
+ */
+function spektra_resolve_image_url( $value ): string {
+	if ( $value === null || $value === false || $value === '' ) {
+		return '';
+	}
+	if ( is_array( $value ) ) {
+		return (string) ( $value['url'] ?? '' );
+	}
+	if ( is_numeric( $value ) && (int) $value > 0 ) {
+		return wp_get_attachment_url( (int) $value ) ?: '';
+	}
+	if ( is_string( $value ) ) {
+		return $value;
+	}
+	return '';
 }

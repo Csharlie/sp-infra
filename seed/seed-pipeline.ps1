@@ -8,6 +8,7 @@
       2. Import seed.json into WordPress (ACF update_field)
       3. Dump current WP ACF state to wp-state.json
       4. Verify parity: seed.json vs wp-state.json
+      5. Endpoint smoke: /spektra/v1/site image field resolution
 
 .PARAMETER DryRun
     Run import in dry-run mode (no WP writes).
@@ -44,6 +45,7 @@ $WpState     = Join-Path $SeedDir 'wp-state.json'
 $ImportPhp   = Join-Path $SeedDir 'import-seed.php'
 $DumpPhp     = Join-Path $SeedDir 'dump-acf.php'
 $VerifyTs    = Join-Path $SeedDir 'verify-parity.ts'
+$EndpointPhp = Join-Path $SeedDir 'verify-endpoint.php'
 
 # PHP - use highest 8.4.x in WAMP (8.5+ breaks WP-CLI phar)
 $WampPhpBase = 'D:\Local\wamp\bin\php'
@@ -196,12 +198,24 @@ try {
     Pop-Location
 }
 
+# -- Step 5: Endpoint smoke test --------------------------------
+
+Write-Step 5 "Endpoint smoke: /spektra/v1/site image fields"
+
+$endpointWpArgs = @('eval-file', $EndpointPhp)
+$endpointScriptArgs = @()
+if ($Verbose) { $endpointScriptArgs += 'verbose' }
+
+Invoke-WpCli -WpArgs $endpointWpArgs -ScriptArgs $endpointScriptArgs
+
+Write-Host '  [OK] Endpoint smoke passed' -ForegroundColor Green
+
 # -- Result -----------------------------------------------------
 
 Write-Host ""
 if ($verifyExit -eq 0) {
     Write-Host '  PIPELINE RESULT: PASS' -ForegroundColor Green
 } else {
-    Write-Host '  PIPELINE RESULT: FAIL' -ForegroundColor Red
+    Write-Host '  PIPELINE RESULT: FAIL (parity)' -ForegroundColor Red
     exit 1
 }

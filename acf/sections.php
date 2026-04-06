@@ -9,8 +9,8 @@
  * - Required field missing → return null (section skipped by caller)
  * - Optional field missing → key present with null/empty/default value
  * - Image fields normalized via spektra_normalize_media() → Media | null
- *   (exceptions: bc-gallery images[].src and bc-brand brands[].logo stay
- *   as URL strings — frontend schemas expect string, P8 mapper handles it)
+ *   Gallery images[].src and brand brands[].logo resolved via
+ *   spektra_resolve_image_url() → URL string (handles attachment IDs).
  * - Output keys are camelCase (matches platform TypeScript contracts)
  * - bc-* specific — acknowledged as P11.3 technical debt
  *
@@ -117,10 +117,9 @@ function spektra_build_bc_brand( string $p, int $pid ): ?array {
 		'title'       => spektra_get_field( $p . 'title', $pid, '' ),
 		'description' => spektra_get_field( $p . 'description', $pid, '' ),
 		'brands'      => array_map( function ( array $row ): array {
-			$logo = $row['logo'] ?? null;
 			return [
 				'name'   => $row['name'] ?? '',
-				'logo'   => is_array( $logo ) ? ( $logo['url'] ?? '' ) : ( $logo ?? '' ),
+				'logo'   => spektra_resolve_image_url( $row['logo'] ?? null ),
 				'alt'    => $row['alt'] ?? '',
 				'invert' => (bool) ( $row['invert'] ?? false ),
 			];
@@ -148,7 +147,7 @@ function spektra_build_bc_gallery( string $p, int $pid ): ?array {
 		'showCategories' => (bool) spektra_get_field( $p . 'show_categories', $pid, false ),
 		'images'         => array_map( function ( array $row ): array {
 			return [
-				'src'      => $row['src'] ?? null,
+				'src'      => spektra_resolve_image_url( $row['src'] ?? null ),
 				'alt'      => $row['alt'] ?? '',
 				'category' => $row['category'] ?? '',
 				'caption'  => $row['caption'] ?? '',
