@@ -28,9 +28,26 @@ site.ts (client static data)
 ```
 seed/
 ├── import-seed.php    # ACF-aware importer (wp eval-file) — P8.5.4
-├── verify-parity.ts   # (Phase 8.5.5) Parity check — site.ts vs WP API
+├── dump-acf.php       # Dump current WP ACF state as JSON — P8.5.5
+├── verify-parity.ts   # Parity check: seed.json vs wp-state.json — P8.5.5
 ├── package.json       # @spektra/seed — tsx dependency
 └── README.md
+```
+
+## Verification workflow
+
+```bash
+# 1. Generate seed (in client repo)
+pnpm seed:export
+
+# 2. Import into WP
+wp eval-file import-seed.php
+
+# 3. Dump current WP state
+wp eval-file dump-acf.php
+
+# 4. Verify parity
+npx tsx verify-parity.ts --verbose
 ```
 
 ## Rules

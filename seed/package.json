@@ -2,10 +2,11 @@
   "name": "@spektra/seed",
   "version": "0.1.0",
   "private": true,
-  "description": "Seed pipeline tools — site.ts → seed.json → WP-CLI import",
+  "description": "Seed pipeline tools — import, dump, verify (ACF parity)",
   "type": "module",
   "scripts": {
-    "export": "tsx export-seed.ts"
+    "verify": "tsx verify-parity.ts",
+    "verify:verbose": "tsx verify-parity.ts --verbose"
   },
   "devDependencies": {
     "tsx": "^4.0.0"
