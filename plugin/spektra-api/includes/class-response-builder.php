@@ -51,18 +51,17 @@ class Response_Builder {
 	/**
 	 * Load client overlay config.
 	 *
-	 * @return array Config array, or empty array if missing.
+	 * Uses the canonical config loaded at bootstrap time (SPEKTRA_CLIENT_CONFIG
+	 * constant, set in spektra-api.php via ENV var / symlink fallback).
+	 * This ensures CORS, Response Builder, and all other consumers share the
+	 * same config source within a single request.
+	 *
+	 * @return array Config array, or empty array if not bootstrapped.
 	 */
 	private function load_config(): array {
-		$path = WP_PLUGIN_DIR . '/spektra-config/config.php';
-
-		if ( ! file_exists( $path ) ) {
-			return [];
-		}
-
-		$config = require $path;
-
-		return is_array( $config ) ? $config : [];
+		return defined( 'SPEKTRA_CLIENT_CONFIG' ) && is_array( SPEKTRA_CLIENT_CONFIG )
+			? SPEKTRA_CLIENT_CONFIG
+			: [];
 	}
 
 	/**
