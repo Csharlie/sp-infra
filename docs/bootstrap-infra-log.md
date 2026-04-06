@@ -40,7 +40,7 @@ D:\Projects\spektra\sp-infra\          ← shared WP integration infra
 ├── apps/                              ← Runnable infra presets
 │   └── README.md
 ├── docs/                              ← Infrastructure documentation
-│   └── bootstrap-log.md               ← ez a fájl
+│   └── bootstrap-infra-log.md          ← ez a fájl
 ├── .gitignore                         ← runtime + environment + IDE ignores
 ├── BOUNDARY.md                        ← v4 határ-szabályok dokumentáció
 └── README.md
@@ -130,7 +130,7 @@ sp-infra/
 
 ```
 docs/
-└── bootstrap-log.md           ← kronológikus napló (ez a fájl)
+└── bootstrap-infra-log.md          ← kronológikus napló (ez a fájl)
 ```
 
 ### Státusz
