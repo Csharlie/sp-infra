@@ -790,7 +790,7 @@ Validated: site meta, navigation (primary NavItem[]), pages (min 1), sections (i
 
 3. **`spektra_acf_group_to_cta()` — CTA field name fix (helpers.php):**
    - Régi: `label` / `url` / `target` → nem egyezett a platform type-pal
-   - Új: `text` / `href` — illeszkedik a `CallToAction { text: string, href?: string }` típushoz
+   - Új: `text` / `href` — illeszkedik a `CallToAction { text: string, href: string }` típushoz (P8-R4: href kötelező)
    - `target` eltávolítva (nincs a platform contract-ban)
 
 4. **`spektra_normalize_media()` — új fájl (media-helper.php):**
