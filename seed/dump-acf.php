@@ -129,7 +129,7 @@ foreach ( array_keys( $seed['fields'] ?? [] ) as $key ) {
 		}
 	}
 
-	$state['fields'][ $key ] = normalize_dump_value( $value );
+	$state['fields'][ $key ] = normalize_dump_value( $value, $seed['fields'][ $key ] ?? null );
 }
 
 // ── Write output ─────────────────────────────────────────────────
@@ -151,16 +151,20 @@ WP_CLI::success( "Dumped {$field_count} fields + {$option_count} options → {$o
  *
  * ACF returns image sub-fields as full arrays ({ID, url, sizes, ...})
  * when return_format='array'. The seed stores them as bare URL/path strings.
- * This function normalizes the dump to match the seed shape.
+ * ACF group sub-fields come back with prefixed keys (field_parent_subkey)
+ * while the seed uses short keys (subkey). This function normalizes both.
  *
  * Rules:
  *   - ACF image array (has 'ID' key + 'url' key) → extract URL string
  *   - Numeric attachment ID → convert to WP URL via wp_get_attachment_url()
  *   - Sequential array → recurse each element (repeater rows)
- *   - Associative array → recurse each value (group/row sub-fields)
+ *   - Associative array (group) → strip ACF key prefix using seed shape as reference
  *   - Scalar → return as-is
+ *
+ * @param mixed      $value      ACF field value.
+ * @param mixed|null $seed_shape Corresponding seed value (used as key reference for groups).
  */
-function normalize_dump_value( $value ) {
+function normalize_dump_value( $value, $seed_shape = null ) {
 	if ( ! is_array( $value ) ) {
 		// Numeric string that looks like an attachment ID (stored by sideloader).
 		if ( is_numeric( $value ) && (int) $value > 0 ) {
@@ -178,10 +182,47 @@ function normalize_dump_value( $value ) {
 
 	// Sequential array — repeater rows: recurse each element.
 	if ( array_is_list( $value ) ) {
-		return array_map( 'normalize_dump_value', $value );
+		$seed_row = is_array( $seed_shape ) && array_is_list( $seed_shape ) && ! empty( $seed_shape )
+			? $seed_shape[0]
+			: null;
+		return array_map( function ( $item ) use ( $seed_row ) {
+			return normalize_dump_value( $item, $seed_row );
+		}, $value );
 	}
 
-	// Associative array — group or row: recurse each sub-field.
+	// Associative array — group or repeater row sub-fields.
+	// ACF group fields return keys like "field_bc_service_contact_title"
+	// while the seed uses short keys like "title". Remap using seed shape.
+	if ( is_array( $seed_shape ) && ! array_is_list( $seed_shape ) ) {
+		$seed_keys = array_keys( $seed_shape );
+		$acf_keys  = array_keys( $value );
+
+		// Build a mapping: for each seed key, find the ACF key that ends with it.
+		// ACF group sub-field keys follow the pattern: field_{parent}_{subkey}
+		$remapped     = [];
+		$used_acf_keys = [];
+
+		foreach ( $seed_keys as $sk ) {
+			$suffix = '_' . $sk;
+			foreach ( $acf_keys as $ak ) {
+				if ( str_ends_with( $ak, $suffix ) && ! isset( $used_acf_keys[ $ak ] ) ) {
+					$remapped[ $sk ] = normalize_dump_value( $value[ $ak ], $seed_shape[ $sk ] ?? null );
+					$used_acf_keys[ $ak ] = true;
+					break;
+				}
+			}
+			// If no ACF key matched via suffix, try exact match (already clean keys).
+			if ( ! isset( $remapped[ $sk ] ) && array_key_exists( $sk, $value ) ) {
+				$remapped[ $sk ] = normalize_dump_value( $value[ $sk ], $seed_shape[ $sk ] ?? null );
+			}
+		}
+
+		if ( ! empty( $remapped ) ) {
+			return $remapped;
+		}
+	}
+
+	// Fallback: recurse each sub-field without key remapping.
 	$normalized = [];
 	foreach ( $value as $k => $v ) {
 		$normalized[ $k ] = normalize_dump_value( $v );
