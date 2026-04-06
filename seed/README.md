@@ -17,7 +17,7 @@ Convert client `site.ts` static data to WP-CLI importable format, then import in
 site.ts (client static data)
   → export-seed.ts (kliens repo — <client>/infra/seed/)
     → seed.json (generated, gitignored)
-      → import-seed.sh (sp-infra/seed/)
+      → import-seed.php (sp-infra/seed/ — wp eval-file, ACF API)
         → WordPress DB (ACF field values)
       → verify-parity.ts (sp-infra/seed/)
         → PASS / FAIL
@@ -27,9 +27,7 @@ site.ts (client static data)
 
 ```
 seed/
-├── export-seed.ts     # DEPRECATED scaffold — törlendő P8.5.4-ben
-│                      # Canonical hely: <client>/infra/seed/export-seed.ts
-├── import-seed.sh     # (Phase 8.5.4) WP-CLI import script
+├── import-seed.php    # ACF-aware importer (wp eval-file) — P8.5.4
 ├── verify-parity.ts   # (Phase 8.5.5) Parity check — site.ts vs WP API
 ├── package.json       # @spektra/seed — tsx dependency
 └── README.md

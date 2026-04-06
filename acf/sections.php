@@ -73,7 +73,10 @@ function spektra_build_bc_hero( string $p, int $pid ): ?array {
 		'title'           => $title,
 		'subtitle'        => spektra_get_field( $p . 'subtitle', $pid, '' ),
 		'description'     => $desc,
-		'backgroundImage' => spektra_normalize_media( spektra_get_field( $p . 'background_image', $pid ) ),
+		'backgroundImage' => spektra_normalize_media(
+			spektra_get_field( $p . 'background_image', $pid ),
+			spektra_get_field( $p . 'background_image_alt', $pid, '' )
+		),
 	];
 
 	$pct = spektra_get_field( $p . 'primary_cta_text', $pid );
@@ -261,7 +264,10 @@ function spektra_build_bc_about( string $p, int $pid ): ?array {
 		'content'       => array_map( function ( array $row ): string {
 			return $row['paragraph'] ?? '';
 		}, $content ),
-		'image'         => spektra_normalize_media( spektra_get_field( $p . 'image', $pid ) ),
+		'image'         => spektra_normalize_media(
+			spektra_get_field( $p . 'image', $pid ),
+			spektra_get_field( $p . 'image_alt', $pid, '' )
+		),
 		'imagePosition' => spektra_get_field( $p . 'image_position', $pid, 'right' ),
 		'colorScheme'   => spektra_get_field( $p . 'color_scheme', $pid, 'light' ),
 	];
@@ -308,7 +314,10 @@ function spektra_build_bc_team( string $p, int $pid ): ?array {
 			return [
 				'name'  => $row['name'] ?? '',
 				'role'  => $row['role'] ?? '',
-				'image' => spektra_normalize_media( $row['image'] ?? null ),
+				'image' => spektra_normalize_media(
+					$row['image'] ?? null,
+					$row['image_alt'] ?? ''
+				),
 				'phone' => $row['phone'] ?? '',
 				'email' => $row['email'] ?? '',
 			];
