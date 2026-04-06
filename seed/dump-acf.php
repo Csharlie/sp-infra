@@ -79,6 +79,16 @@ foreach ( array_keys( $seed['site_options'] ?? [] ) as $key ) {
 
 // ── Dump ACF fields ──────────────────────────────────────────────
 
+// Pre-scan: identify image fields in seed (value is {url, alt} object).
+// These are stored as plain URL strings in WP, with a companion _alt field.
+// We reconstruct the {url, alt} shape so verify-parity.ts can compare them.
+$image_keys = [];
+foreach ( $seed['fields'] ?? [] as $key => $seed_value ) {
+	if ( is_array( $seed_value ) && isset( $seed_value['url'] ) && isset( $seed_value['alt'] ) ) {
+		$image_keys[ $key ] = true;
+	}
+}
+
 foreach ( array_keys( $seed['fields'] ?? [] ) as $key ) {
 	$value = get_field( $key, $post_id, false );
 
@@ -86,6 +96,17 @@ foreach ( array_keys( $seed['fields'] ?? [] ) as $key ) {
 	// For repeater fields, ACF stores them differently — use formatted value.
 	if ( $value === null || $value === false ) {
 		$value = get_field( $key, $post_id );
+	}
+
+	// Reconstruct {url, alt} shape for image fields.
+	// import-seed.php stores image as URL string; the alt lives in a separate _alt field.
+	if ( isset( $image_keys[ $key ] ) && is_string( $value ) ) {
+		$alt_key   = $key . '_alt';
+		$alt_value = get_field( $alt_key, $post_id, false );
+		if ( $alt_value === null || $alt_value === false ) {
+			$alt_value = get_field( $alt_key, $post_id ) ?? '';
+		}
+		$value = [ 'url' => $value, 'alt' => (string) $alt_value ];
 	}
 
 	$state['fields'][ $key ] = $value;
