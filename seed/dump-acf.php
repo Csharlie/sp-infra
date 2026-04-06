@@ -22,7 +22,11 @@ defined( 'ABSPATH' ) || exit;
 // ── CLI args ─────────────────────────────────────────────────────
 
 $seed_path  = $args[0] ?? __DIR__ . '/seed.json';
+// Accept both --output and output (WP-CLI intercepts -- prefixed flags)
 $output_idx = array_search( '--output', $args ?? [], true );
+if ( $output_idx === false ) {
+	$output_idx = array_search( 'output', $args ?? [], true );
+}
 $output_path = ( $output_idx !== false && isset( $args[ $output_idx + 1 ] ) )
 	? $args[ $output_idx + 1 ]
 	: __DIR__ . '/wp-state.json';

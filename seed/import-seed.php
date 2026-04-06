@@ -32,8 +32,9 @@ defined( 'ABSPATH' ) || exit;
 // ── CLI args ─────────────────────────────────────────────────────
 
 $seed_path = $args[0] ?? __DIR__ . '/seed.json';
-$dry_run   = in_array( '--dry-run', $args ?? [], true );
-$verbose   = in_array( '--verbose', $args ?? [], true );
+// Accept both --dry-run and dry-run (WP-CLI intercepts -- prefixed flags)
+$dry_run   = in_array( '--dry-run', $args ?? [], true ) || in_array( 'dry-run', $args ?? [], true );
+$verbose   = in_array( '--verbose', $args ?? [], true ) || in_array( 'verbose', $args ?? [], true );
 
 // ── Validate environment ─────────────────────────────────────────
 
