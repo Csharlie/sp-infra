@@ -102,7 +102,7 @@ class Response_Builder {
 	 *
 	 * Platform contract: { primary: NavItem[], footer?: NavItem[] }
 	 *
-	 * Source: config['navigation']['primary'] — curated list.
+	 * Source: config['navigation']['primary'] and config['navigation']['footer'] — curated lists.
 	 * Future: native WordPress menu integration (Phase 11.5).
 	 *
 	 * @param array $config Client config.
@@ -111,12 +111,17 @@ class Response_Builder {
 	private function build_navigation( array $config ): array {
 		$nav_config = $config['navigation'] ?? [];
 		$primary    = $nav_config['primary'] ?? [];
+		$footer     = $nav_config['footer'] ?? [];
 
-		$items = array_map( [ $this, 'normalize_nav_item' ], $primary );
-
-		return [
-			'primary' => array_values( $items ),
+		$nav = [
+			'primary' => array_values( array_map( [ $this, 'normalize_nav_item' ], $primary ) ),
 		];
+
+		if ( ! empty( $footer ) ) {
+			$nav['footer'] = array_values( array_map( [ $this, 'normalize_nav_item' ], $footer ) );
+		}
+
+		return $nav;
 	}
 
 	/**

@@ -175,7 +175,25 @@ function compareField(key: string, expected: unknown, actual: unknown): FieldRes
     return { key, status: 'match' }
   }
 
+  // Bare image reference: seed stores a URL/path string, dump stores a WP media URL.
+  // Apply media exception: both non-empty means the image was sideloaded OK.
+  if (looksLikeImageRef(expStr) && actStr !== '' && actStr !== 'undefined' && actStr !== 'null') {
+    if (strict && expStr !== actStr) {
+      return { key, status: 'media-fail', expected, actual, detail: `URL mismatch (strict)` }
+    }
+    return { key, status: 'media-ok', detail: 'image ref, URL differs (OK)' }
+  }
+
   return { key, status: 'mismatch', expected, actual, detail: `"${expStr}" vs "${actStr}"` }
+}
+
+/**
+ * Detect whether a string looks like an image reference (URL or local path).
+ */
+function looksLikeImageRef(s: string): boolean {
+  if (/\.(jpe?g|png|webp|gif|svg|avif)(\?.*)?$/i.test(s)) return true
+  if (s.includes('images.unsplash.com')) return true
+  return false
 }
 
 // ── Compare site_options ─────────────────────────────────────────

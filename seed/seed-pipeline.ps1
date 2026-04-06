@@ -88,7 +88,19 @@ function Invoke-WpCli {
 
     # Script-specific args go as positional (no -- prefix) so WP-CLI won't intercept them.
     $fullArgs = @($WpCliPhar) + $WpArgs + @("--path=$WpRuntime") + $ScriptArgs
-    & $PhpExe @fullArgs
+    # PHP/WP-CLI writes deprecation notices + WP_CLI::warning() to stderr.
+    # With $ErrorActionPreference = 'Stop', stderr lines from native commands
+    # become terminating errors. Temporarily switch to Continue for the PHP call.
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    & $PhpExe @fullArgs 2>&1 | ForEach-Object {
+        if ($_ -is [System.Management.Automation.ErrorRecord]) {
+            Write-Host $_.Exception.Message -ForegroundColor DarkYellow
+        } else {
+            Write-Host $_
+        }
+    }
+    $ErrorActionPreference = $prevEAP
     if ($LASTEXITCODE -ne 0) {
         throw "WP-CLI failed (exit code $LASTEXITCODE)"
     }
@@ -148,6 +160,9 @@ $importWpArgs = @('eval-file', $ImportPhp)
 $importScriptArgs = @($SeedJson)
 if ($DryRun)  { $importScriptArgs += 'dry-run' }
 if ($Verbose) { $importScriptArgs += 'verbose' }
+# Pass client dir so importer can resolve local asset paths for sideloading
+$importScriptArgs += 'client-dir'
+$importScriptArgs += $ClientDir
 
 Invoke-WpCli -WpArgs $importWpArgs -ScriptArgs $importScriptArgs
 

@@ -84,7 +84,7 @@ foreach ( array_keys( $seed['site_options'] ?? [] ) as $key ) {
 // ── Dump ACF fields ──────────────────────────────────────────────
 
 // Pre-scan: identify image fields in seed (value is {url, alt} object).
-// These are stored as plain URL strings in WP, with a companion _alt field.
+// After sideloading, these are stored as attachment IDs in WP.
 // We reconstruct the {url, alt} shape so verify-parity.ts can compare them.
 $image_keys = [];
 foreach ( $seed['fields'] ?? [] as $key => $seed_value ) {
@@ -103,17 +103,33 @@ foreach ( array_keys( $seed['fields'] ?? [] ) as $key ) {
 	}
 
 	// Reconstruct {url, alt} shape for image fields.
-	// import-seed.php stores image as URL string; the alt lives in a separate _alt field.
-	if ( isset( $image_keys[ $key ] ) && is_string( $value ) ) {
+	// import-seed.php sideloads images → stores attachment ID.
+	// get_field(format=false) returns the attachment ID as string/int.
+	// get_field(format=true) returns the full ACF image array.
+	if ( isset( $image_keys[ $key ] ) ) {
 		$alt_key   = $key . '_alt';
 		$alt_value = get_field( $alt_key, $post_id, false );
 		if ( $alt_value === null || $alt_value === false ) {
 			$alt_value = get_field( $alt_key, $post_id ) ?? '';
 		}
-		$value = [ 'url' => $value, 'alt' => (string) $alt_value ];
+
+		// Value could be: attachment ID (int/string), ACF image array, or URL string.
+		if ( is_numeric( $value ) && (int) $value > 0 ) {
+			// Attachment ID → get the URL from WP.
+			$img_url = wp_get_attachment_url( (int) $value );
+			$value = [ 'url' => $img_url ?: (string) $value, 'alt' => (string) $alt_value ];
+		} elseif ( is_array( $value ) && ! empty( $value['url'] ) ) {
+			// ACF image array (formatted).
+			$value = [ 'url' => $value['url'], 'alt' => (string) $alt_value ];
+		} elseif ( is_string( $value ) ) {
+			// Legacy: URL string (pre-sideload import).
+			$value = [ 'url' => $value, 'alt' => (string) $alt_value ];
+		} else {
+			$value = [ 'url' => '', 'alt' => (string) $alt_value ];
+		}
 	}
 
-	$state['fields'][ $key ] = $value;
+	$state['fields'][ $key ] = normalize_dump_value( $value );
 }
 
 // ── Write output ─────────────────────────────────────────────────
@@ -127,3 +143,48 @@ if ( file_put_contents( $output_path, $json ) === false ) {
 $field_count = count( $state['fields'] );
 $option_count = count( $state['site_options'] );
 WP_CLI::success( "Dumped {$field_count} fields + {$option_count} options → {$output_path}" );
+
+// ── Helpers ──────────────────────────────────────────────────────
+
+/**
+ * Recursively normalize ACF values for JSON output.
+ *
+ * ACF returns image sub-fields as full arrays ({ID, url, sizes, ...})
+ * when return_format='array'. The seed stores them as bare URL/path strings.
+ * This function normalizes the dump to match the seed shape.
+ *
+ * Rules:
+ *   - ACF image array (has 'ID' key + 'url' key) → extract URL string
+ *   - Numeric attachment ID → convert to WP URL via wp_get_attachment_url()
+ *   - Sequential array → recurse each element (repeater rows)
+ *   - Associative array → recurse each value (group/row sub-fields)
+ *   - Scalar → return as-is
+ */
+function normalize_dump_value( $value ) {
+	if ( ! is_array( $value ) ) {
+		// Numeric string that looks like an attachment ID (stored by sideloader).
+		if ( is_numeric( $value ) && (int) $value > 0 ) {
+			$url = wp_get_attachment_url( (int) $value );
+			return $url ?: $value;
+		}
+		return $value;
+	}
+
+	// ACF image array (returned by get_field with return_format='array').
+	// Shape: { ID: int, url: string, sizes: {...}, width: int, height: int, ... }
+	if ( isset( $value['ID'] ) && isset( $value['url'] ) && is_string( $value['url'] ) ) {
+		return $value['url'];
+	}
+
+	// Sequential array — repeater rows: recurse each element.
+	if ( array_is_list( $value ) ) {
+		return array_map( 'normalize_dump_value', $value );
+	}
+
+	// Associative array — group or row: recurse each sub-field.
+	$normalized = [];
+	foreach ( $value as $k => $v ) {
+		$normalized[ $k ] = normalize_dump_value( $v );
+	}
+	return $normalized;
+}
