@@ -4,11 +4,15 @@
 
 .DESCRIPTION
     Runs the full content parity pipeline in one command:
-      1. Export seed.json from site.ts (sp-benettcar)
+      1. Export seed.json from site.ts (client repo)
       2. Import seed.json into WordPress (ACF update_field)
       3. Dump current WP ACF state to wp-state.json
       4. Verify parity: seed.json vs wp-state.json
       5. Endpoint smoke: /spektra/v1/site image field resolution
+
+.PARAMETER Client
+    Client slug (must match sp-clients/sp-<Client> and .local/wp-runtimes/<Client>).
+    Default: benettcar.
 
 .PARAMETER DryRun
     Run import in dry-run mode (no WP writes).
@@ -21,12 +25,14 @@
 
 .EXAMPLE
     .\seed-pipeline.ps1
-    .\seed-pipeline.ps1 -Verbose
+    .\seed-pipeline.ps1 -Client benettcar
+    .\seed-pipeline.ps1 -Client newclient -Verbose
     .\seed-pipeline.ps1 -DryRun
     .\seed-pipeline.ps1 -SkipExport
 #>
 
 param(
+    [string]$Client = 'benettcar',
     [switch]$DryRun,
     [switch]$Verbose,
     [switch]$SkipExport
@@ -38,8 +44,8 @@ $ErrorActionPreference = 'Stop'
 
 $SpRoot      = (Resolve-Path "$PSScriptRoot\..\..").Path
 $SeedDir     = $PSScriptRoot
-$ClientDir   = Join-Path $SpRoot 'sp-clients\sp-benettcar'
-$WpRuntime   = Join-Path $SpRoot '.local\wp-runtimes\benettcar'
+$ClientDir   = Join-Path $SpRoot "sp-clients\sp-$Client"
+$WpRuntime   = Join-Path $SpRoot ".local\wp-runtimes\$Client"
 $SeedJson    = Join-Path $SeedDir 'seed.json'
 $WpState     = Join-Path $SeedDir 'wp-state.json'
 $ImportPhp   = Join-Path $SeedDir 'import-seed.php'

@@ -81,40 +81,41 @@ function check( string $path, bool $ok, $actual, array &$checks, int &$pass, int
 }
 
 foreach ( $sections as $sec ) {
-	$id   = $sec['id'] ?? '?';
+	$id    = $sec['id'] ?? '?';
 	$sdata = $sec['data'] ?? [];
 
-	switch ( $id ) {
-		case 'bc-hero':
-			$bg = $sdata['backgroundImage'] ?? null;
-			check( "bc-hero.backgroundImage", is_valid_media_shape( $bg ), $bg, $checks, $pass, $fail );
-			break;
+	// Data-driven: walk all fields and check anything that looks like an image.
+	// Handles: Media shapes ({src: "..."}) and plain URL strings in known image keys.
+	$image_keys = [ 'image', 'backgroundImage', 'logo', 'src', 'photo', 'avatar', 'cover' ];
 
-		case 'bc-brand':
-			foreach ( $sdata['brands'] ?? [] as $i => $brand ) {
-				$logo = $brand['logo'] ?? null;
-				check( "bc-brand.brands[{$i}].logo", is_valid_image_url( $logo ), $logo, $checks, $pass, $fail );
+	// Top-level image fields
+	foreach ( $sdata as $key => $value ) {
+		if ( in_array( $key, $image_keys, true ) ) {
+			if ( is_array( $value ) && isset( $value['src'] ) ) {
+				check( "{$id}.{$key}", is_valid_media_shape( $value ), $value, $checks, $pass, $fail );
+			} elseif ( is_string( $value ) || $value === null ) {
+				check( "{$id}.{$key}", is_valid_image_url( $value ), $value, $checks, $pass, $fail );
 			}
-			break;
+		}
 
-		case 'bc-gallery':
-			foreach ( $sdata['images'] ?? [] as $i => $img ) {
-				$src = $img['src'] ?? null;
-				check( "bc-gallery.images[{$i}].src", is_valid_image_url( $src ), $src, $checks, $pass, $fail );
+		// Array of items (brands, images, members, etc.) — check nested image fields
+		if ( is_array( $value ) && ! isset( $value['src'] ) ) {
+			foreach ( $value as $i => $item ) {
+				if ( ! is_array( $item ) ) {
+					continue;
+				}
+				foreach ( $item as $k => $v ) {
+					if ( ! in_array( $k, $image_keys, true ) ) {
+						continue;
+					}
+					if ( is_array( $v ) && isset( $v['src'] ) ) {
+						check( "{$id}.{$key}[{$i}].{$k}", is_valid_media_shape( $v ), $v, $checks, $pass, $fail );
+					} elseif ( is_string( $v ) || $v === null ) {
+						check( "{$id}.{$key}[{$i}].{$k}", is_valid_image_url( $v ), $v, $checks, $pass, $fail );
+					}
+				}
 			}
-			break;
-
-		case 'bc-team':
-			foreach ( $sdata['members'] ?? [] as $i => $member ) {
-				$image = $member['image'] ?? null;
-				check( "bc-team.members[{$i}].image", is_valid_media_shape( $image ), $image, $checks, $pass, $fail );
-			}
-			break;
-
-		case 'bc-about':
-			$img = $sdata['image'] ?? null;
-			check( "bc-about.image", is_valid_media_shape( $img ), $img, $checks, $pass, $fail );
-			break;
+		}
 	}
 }
 
