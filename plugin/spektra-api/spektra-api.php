@@ -62,6 +62,14 @@ require_once $spektra_acf_dir . '/helpers.php';
 require_once $spektra_acf_dir . '/media-helper.php';
 require_once $spektra_acf_dir . '/sections.php';
 
+// === Client section builders ===
+// Load client-owned section builder functions from overlay (if present).
+// The builders.php file registers section builders via spektra_register_section_builder().
+$spektra_builders_path = dirname( $spektra_config_path ) . '/acf/builders.php';
+if ( file_exists( $spektra_builders_path ) ) {
+	require_once $spektra_builders_path;
+}
+
 // === Hook registration ===
 
 add_action( 'rest_api_init', [ Spektra\API\Rest_Controller::class, 'register_routes' ] );
