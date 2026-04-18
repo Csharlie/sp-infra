@@ -143,9 +143,21 @@ foreach ( $fields as $key => $value ) {
 
 	$result = update_field( $key, $acf_value, $post_id );
 
+	// update_field() returns false BOTH on failure AND when the value is unchanged
+	// (standard WordPress update_metadata behaviour). We verify success by reading
+	// the value back instead of relying on the return value.
 	if ( $result === false ) {
-		WP_CLI::warning( "[FAIL] {$key} — update_field returned false" );
-		$error_count++;
+		$verify = get_field( $key, $post_id, false );
+		if ( field_values_match( $verify, $acf_value ) ) {
+			// Value already correct — not an error.
+			if ( $verbose ) {
+				WP_CLI::log( "[OK] [{$kind}] {$key} = " . summarize( $acf_value ) . ' (unchanged)' );
+			}
+			$field_count++;
+		} else {
+			WP_CLI::warning( "[FAIL] {$key} — update_field returned false and stored value does not match" );
+			$error_count++;
+		}
 	} else {
 		if ( $verbose ) {
 			WP_CLI::log( "[OK] [{$kind}] {$key} = " . summarize( $acf_value ) );
@@ -422,4 +434,37 @@ function summarize( $value ): string {
 		return '{' . implode( ', ', array_keys( $value ) ) . '}';
 	}
 	return gettype( $value );
+}
+
+/**
+ * Loose comparison of stored field value vs expected seed value.
+ *
+ * ACF may transform values on read (e.g. image attachment IDs stay int,
+ * booleans become "1"/"0", etc.), so we compare with type coercion.
+ * For arrays, we compare JSON-encoded forms to avoid ordering issues
+ * with associative keys while still catching real mismatches.
+ */
+function field_values_match( $stored, $expected ): bool {
+	// Both null/empty — match.
+	if ( $stored === null && ( $expected === '' || $expected === null || $expected === [] ) ) {
+		return true;
+	}
+
+	// Scalar comparison (loose).
+	if ( ! is_array( $expected ) && ! is_array( $stored ) ) {
+		return (string) $stored === (string) $expected;
+	}
+
+	// Image fields: stored as attachment ID (int), expected as {url,alt} or int.
+	if ( is_int( $stored ) && is_array( $expected ) && isset( $expected['url'] ) ) {
+		// If we got an attachment ID back, the sideload worked — treat as match.
+		return $stored > 0;
+	}
+
+	// Array comparison via JSON.
+	if ( is_array( $stored ) && is_array( $expected ) ) {
+		return json_encode( $stored ) === json_encode( $expected );
+	}
+
+	return false;
 }
