@@ -45,6 +45,34 @@ if ( file_exists( $spektra_config_path ) ) {
 
 define( 'SPEKTRA_CLIENT_CONFIG', $spektra_config );
 
+// === Theme support for headless admin UX ===
+// Headless/local runtimes may use minimal themes without classic menu support.
+// We enable menus here so editors can manage navigation from WP admin.
+add_action(
+	'after_setup_theme',
+	static function () use ( $spektra_config ): void {
+		add_theme_support( 'menus' );
+
+		$menu_locations = [];
+		$menu_config    = is_array( $spektra_config['navigation_menus'] ?? null )
+			? $spektra_config['navigation_menus']
+			: [];
+
+		if ( is_string( $menu_config['primary'] ?? null ) && $menu_config['primary'] !== '' ) {
+			$menu_locations[ $menu_config['primary'] ] = 'Elsődleges navigáció';
+		}
+
+		if ( is_string( $menu_config['footer'] ?? null ) && $menu_config['footer'] !== '' ) {
+			$menu_locations[ $menu_config['footer'] ] = 'Lábléc navigáció';
+		}
+
+		if ( ! empty( $menu_locations ) ) {
+			register_nav_menus( $menu_locations );
+		}
+	},
+	5
+);
+
 // === ACF field group loading ===
 // Load client ACF field groups from overlay (if present).
 // The field-groups.php file registers its own acf/init hook internally,
