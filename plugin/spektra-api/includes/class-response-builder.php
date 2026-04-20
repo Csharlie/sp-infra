@@ -102,13 +102,20 @@ class Response_Builder {
 	 *
 	 * Platform contract: { primary: NavItem[], footer?: NavItem[] }
 	 *
-	 * Source: config['navigation']['primary'] and config['navigation']['footer'] — curated lists.
-	 * Future: native WordPress menu integration (Phase 11.5).
+	 * Source priority:
+	 * 1. WordPress nav menus configured in config['navigation_menus']
+	 * 2. config['navigation'] curated fallback lists
 	 *
 	 * @param array $config Client config.
 	 * @return array Navigation
 	 */
 	private function build_navigation( array $config ): array {
+		$wp_nav = $this->build_navigation_from_wp( $config );
+
+		if ( ! empty( $wp_nav['primary'] ) || ! empty( $wp_nav['footer'] ) ) {
+			return $wp_nav;
+		}
+
 		$nav_config = $config['navigation'] ?? [];
 		$primary    = $nav_config['primary'] ?? [];
 		$footer     = $nav_config['footer'] ?? [];
@@ -122,6 +129,100 @@ class Response_Builder {
 		}
 
 		return $nav;
+	}
+
+	/**
+	 * Build navigation from WordPress nav menus when configured.
+	 *
+	 * @param array $config Client config.
+	 * @return array Navigation
+	 */
+	private function build_navigation_from_wp( array $config ): array {
+		$menu_config = $config['navigation_menus'] ?? [];
+		$primary_key = is_array( $menu_config ) && is_string( $menu_config['primary'] ?? null )
+			? $menu_config['primary']
+			: 'spektra-primary';
+		$footer_key = is_array( $menu_config ) && is_string( $menu_config['footer'] ?? null )
+			? $menu_config['footer']
+			: 'spektra-footer';
+
+		$primary = $this->build_nav_items_from_menu( $primary_key );
+		$footer  = $this->build_nav_items_from_menu( $footer_key );
+
+		$nav = [
+			'primary' => $primary,
+		];
+
+		if ( ! empty( $footer ) ) {
+			$nav['footer'] = $footer;
+		}
+
+		return $nav;
+	}
+
+	/**
+	 * Build a canonical NavItem[] tree from a WordPress menu slug/name.
+	 *
+	 * @param string $menu_key Menu slug or name.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function build_nav_items_from_menu( string $menu_key ): array {
+		$menu = wp_get_nav_menu_object( $menu_key );
+
+		if ( ! $menu || empty( $menu->term_id ) ) {
+			return [];
+		}
+
+		$items = wp_get_nav_menu_items( (int) $menu->term_id, [
+			'update_post_term_cache' => false,
+		] );
+
+		if ( empty( $items ) || ! is_array( $items ) ) {
+			return [];
+		}
+
+		$by_parent = [];
+		foreach ( $items as $item ) {
+			if ( ! is_object( $item ) || empty( $item->ID ) ) {
+				continue;
+			}
+
+			$parent_id = isset( $item->menu_item_parent ) ? (int) $item->menu_item_parent : 0;
+			$by_parent[ $parent_id ][] = $item;
+		}
+
+		$build_tree = function ( int $parent_id ) use ( &$build_tree, $by_parent ): array {
+			$nav_items = [];
+
+			foreach ( $by_parent[ $parent_id ] ?? [] as $item ) {
+				$label = html_entity_decode( wp_strip_all_tags( (string) $item->title ), ENT_QUOTES );
+				$href  = isset( $item->url ) ? trim( (string) $item->url ) : '';
+
+				if ( $label === '' || $href === '' ) {
+					continue;
+				}
+
+				$nav_item = [
+					'label' => $label,
+					'href'  => $href,
+				];
+
+				if ( isset( $item->target ) && $item->target === '_blank' ) {
+					$nav_item['external'] = true;
+				}
+
+				$children = $build_tree( (int) $item->ID );
+				if ( ! empty( $children ) ) {
+					$nav_item['children'] = $children;
+				}
+
+				$nav_items[] = $nav_item;
+			}
+
+			return $nav_items;
+		};
+
+		return $build_tree( 0 );
 	}
 
 	/**
