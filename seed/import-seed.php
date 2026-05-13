@@ -277,6 +277,9 @@ function sideload_image( array $image_value, int $post_id, ?string $client_dir, 
 	] );
 
 	if ( ! empty( $existing ) ) {
+		if ( $alt !== '' ) {
+			update_post_meta( $existing[0], '_wp_attachment_image_alt', $alt );
+		}
 		if ( $verbose ) {
 			WP_CLI::log( "  [CACHED] {$url} → attachment #{$existing[0]}" );
 		}

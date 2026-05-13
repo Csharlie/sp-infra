@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * dump-acf.php — Dump current WP ACF field values as JSON.
  *
@@ -107,11 +107,14 @@ foreach ( array_keys( $seed['fields'] ?? [] ) as $key ) {
 	// get_field(format=false) returns the attachment ID as string/int.
 	// get_field(format=true) returns the full ACF image array.
 	if ( isset( $image_keys[ $key ] ) ) {
-		$alt_key   = $key . '_alt';
-		$alt_value = get_field( $alt_key, $post_id, false );
-		if ( $alt_value === null || $alt_value === false ) {
-			$alt_value = get_field( $alt_key, $post_id ) ?? '';
+		// Read alt from attachment post meta - set by import-seed.php.
+		$attachment_id = is_numeric( $value ) ? (int) $value : 0;
+		if ( ! $attachment_id && is_array( $value ) && isset( $value['ID'] ) ) {
+			$attachment_id = (int) $value['ID'];
 		}
+		$alt_value = $attachment_id > 0
+			? (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true )
+			: '';
 
 		// Value could be: attachment ID (int/string), ACF image array, or URL string.
 		if ( is_numeric( $value ) && (int) $value > 0 ) {
