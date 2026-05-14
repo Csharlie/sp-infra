@@ -45,9 +45,9 @@ class Rest_Controller {
 	 * Rejected: anything else.
 	 *
 	 * @param string $value
-	 * @return true|\WP_Error
+	 * @return bool|\WP_Error
 	 */
-	public static function validate_preview_param( string $value ): true|\WP_Error {
+	public static function validate_preview_param( string $value ): bool|\WP_Error {
 		if ( $value === 'true' ) {
 			return true;
 		}
